@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "457666145998",
+    "project_id": "paysave-40fbb",
+    "storage_bucket": "paysave-40fbb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:457666145998:android:d52f2ddf25e12de9f5aa9f",
+        "android_client_info": {
+          "package_name": "com.example.pay_save"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmxLc6L83LEcmnqnv2G3Qkuyd8ACyuWO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
