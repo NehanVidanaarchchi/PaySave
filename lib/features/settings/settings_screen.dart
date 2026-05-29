@@ -13,9 +13,9 @@ import '../../providers/bill_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/monthly_plan_provider.dart';
 import '../../providers/saving_provider.dart';
-import 'widgets/monthly_summary_chart.dart';
-import 'widgets/report_card.dart';
-import 'widgets/spending_pie_chart.dart';
+import '../reports/widgets/monthly_summary_chart.dart';
+import '../reports/widgets/report_card.dart';
+import '../reports/widgets/spending_pie_chart.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});

@@ -3,23 +3,33 @@ import 'package:flutter/material.dart';
 import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
+
 import '../features/bills/add_bill_screen.dart';
 import '../features/bills/bills_screen.dart';
 import '../features/bills/edit_bill_screen.dart';
+
 import '../features/expenses/add_expense_screen.dart';
 import '../features/expenses/expenses_screen.dart';
+
 import '../features/home/home_screen.dart';
+
 import '../features/installments/add_installment_screen.dart';
 import '../features/installments/installment_details_screen.dart';
 import '../features/installments/installments_screen.dart';
+
 import '../features/onboarding/onboarding_screen.dart';
+
 import '../features/planner/monthly_plan_screen.dart';
 import '../features/planner/monthly_plan_setup_screen.dart';
+
 import '../features/reports/reports_screen.dart';
-import '../features/savings/add_saving_goal_screen.dart';
-import '../features/savings/savings_screen.dart';
+
+import '../features/saving/add_saving_goal_screen.dart';
+import '../features/saving/savings_screen.dart';
+
 import '../features/settings/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
+
 import '../features/splash/splash_screen.dart';
 
 class AppRoutes {
@@ -98,7 +108,9 @@ class AppRoutes {
 
       case installmentDetails:
         final installmentId = settings.arguments as String?;
-        return _page(InstallmentDetailsScreen(installmentId: installmentId));
+        return _page(
+          InstallmentDetailsScreen(installmentId: installmentId),
+        );
 
       case savings:
         return _page(const SavingsScreen());
@@ -123,12 +135,16 @@ class AppRoutes {
 
       default:
         return _page(
-          const Scaffold(body: Center(child: Text('Page not found'))),
+          const Scaffold(
+            body: Center(
+              child: Text('Page not found'),
+            ),
+          ),
         );
     }
   }
 
-  static PageRouteBuilder _page(Widget child) {
+  static PageRouteBuilder<dynamic> _page(Widget child) {
     return PageRouteBuilder(
       pageBuilder: (_, __, ___) => child,
       transitionsBuilder: (_, animation, __, child) {
