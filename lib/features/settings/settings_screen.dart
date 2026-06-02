@@ -1,469 +1,510 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/helpers/currency_helper.dart';
-import '../../core/widgets/error_view.dart';
-import '../../core/widgets/loading_view.dart';
-import '../../data/models/bill_model.dart';
-import '../../data/models/expense_model.dart';
-import '../../data/models/monthly_plan_model.dart';
-import '../../data/models/saving_goal_model.dart';
-import '../../providers/bill_provider.dart';
-import '../../providers/expense_provider.dart';
-import '../../providers/monthly_plan_provider.dart';
-import '../../providers/saving_provider.dart';
-import '../reports/widgets/monthly_summary_chart.dart';
-import '../reports/widgets/report_card.dart';
-import '../reports/widgets/spending_pie_chart.dart';
+import '../../core/constants/app_sizes.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/theme_provider.dart';
 
-class ReportsScreen extends StatelessWidget {
-  const ReportsScreen({super.key});
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
 
-  double _totalPaidBills(List<BillModel> bills) {
-    return bills
-        .where((bill) => bill.isPaid)
-        .fold<double>(0, (total, bill) => total + bill.amount);
-  }
+  Future<void> _logout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Logout?'),
+          content: const Text('Are you sure you want to logout from PaySave?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'Logout',
+                style: TextStyle(color: AppColors.danger),
+              ),
+            ),
+          ],
+        );
+      },
+    );
 
-  double _totalUnpaidBills(List<BillModel> bills) {
-    return bills
-        .where((bill) => !bill.isPaid)
-        .fold<double>(0, (total, bill) => total + bill.amount);
-  }
+    if (confirm != true) return;
+    if (!context.mounted) return;
 
-  double _totalSaved(List<SavingGoalModel> goals) {
-    return goals.fold<double>(0, (total, goal) => total + goal.savedAmount);
-  }
+    // await context.read<AuthProvider>().logout();
 
-  @override
-  Widget build(BuildContext context) {
-    final planProvider = context.read<MonthlyPlanProvider>();
-    final expenseProvider = context.read<ExpenseProvider>();
-    final billProvider = context.read<BillProvider>();
-    final savingProvider = context.read<SavingProvider>();
+    if (!context.mounted) return;
 
-    return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      body: SafeArea(
-        bottom: false,
-        child: StreamBuilder<MonthlyPlanModel?>(
-          stream: planProvider.watchCurrentMonthPlan(),
-          builder: (context, planSnapshot) {
-            final plan = planSnapshot.data;
-
-            return StreamBuilder<List<ExpenseModel>>(
-              stream: expenseProvider.watchExpensesByMonth(DateTime.now()),
-              builder: (context, expenseSnapshot) {
-                if (expenseSnapshot.hasError) {
-                  return ErrorView(message: expenseSnapshot.error.toString());
-                }
-
-                if (expenseSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const LoadingView(message: 'Loading reports...');
-                }
-
-                final expenses = expenseSnapshot.data ?? [];
-                final totalIncomeRecords = expenseProvider.totalIncome(
-                  expenses,
-                );
-                final totalExpenseRecords = expenseProvider.totalExpenses(
-                  expenses,
-                );
-                final categoryTotals = expenseProvider.categoryTotals(expenses);
-
-                return StreamBuilder<List<BillModel>>(
-                  stream: billProvider.watchBills(),
-                  builder: (context, billSnapshot) {
-                    final bills = billSnapshot.data ?? [];
-
-                    return StreamBuilder<List<SavingGoalModel>>(
-                      stream: savingProvider.watchSavingGoals(),
-                      builder: (context, savingSnapshot) {
-                        final goals = savingSnapshot.data ?? [];
-
-                        final income =
-                            plan?.monthlyIncome ?? totalIncomeRecords;
-                        final plannedBills = plan?.billsBudget ?? 0;
-                        final plannedSavings = plan?.savingTarget ?? 0;
-                        final paidBills = _totalPaidBills(bills);
-                        final unpaidBills = _totalUnpaidBills(bills);
-                        final savedAmount = _totalSaved(goals);
-
-                        return ListView(
-                          physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(22, 18, 22, 120),
-                          children: [
-                            const _ReportHeader(),
-                            const SizedBox(height: 24),
-                            _DarkHeroCard(
-                              income: income,
-                              expenses: totalExpenseRecords,
-                              saved: savedAmount,
-                            ),
-                            const SizedBox(height: 22),
-                            GridView.count(
-                              padding: EdgeInsets.zero,
-                              crossAxisCount: 2,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisSpacing: 14,
-                              mainAxisSpacing: 14,
-                              childAspectRatio: 1.45,
-                              children: [
-                                ReportCard(
-                                  title: 'Income',
-                                  value: CurrencyHelper.format(income),
-                                  subtitle: 'Monthly income',
-                                  icon: Icons.trending_up_rounded,
-                                  color: AppColors.info,
-                                  isDark: true,
-                                ),
-                                ReportCard(
-                                  title: 'Expenses',
-                                  value: CurrencyHelper.format(
-                                    totalExpenseRecords,
-                                  ),
-                                  subtitle: 'Recorded spending',
-                                  icon: Icons.trending_down_rounded,
-                                  color: AppColors.danger,
-                                  isDark: true,
-                                ),
-                                ReportCard(
-                                  title: 'Paid Bills',
-                                  value: CurrencyHelper.format(paidBills),
-                                  subtitle: 'Already paid',
-                                  icon: Icons.check_circle_rounded,
-                                  color: AppColors.success,
-                                  isDark: true,
-                                ),
-                                ReportCard(
-                                  title: 'Unpaid Bills',
-                                  value: CurrencyHelper.format(unpaidBills),
-                                  subtitle: 'Still pending',
-                                  icon: Icons.pending_actions_rounded,
-                                  color: AppColors.warning,
-                                  isDark: true,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 22),
-                            MonthlySummaryChart(
-                              income: income,
-                              expenses: totalExpenseRecords,
-                              bills: plannedBills,
-                              savings: plannedSavings,
-                            ),
-                            const SizedBox(height: 22),
-                            SpendingPieChart(categoryTotals: categoryTotals),
-                            const SizedBox(height: 22),
-                            _BillsProgressCard(
-                              paidBills: paidBills,
-                              unpaidBills: unpaidBills,
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
-        ),
-      ),
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.login,
+      (_) => false,
     );
   }
-}
-
-class _ReportHeader extends StatelessWidget {
-  const _ReportHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    final user = FirebaseAuth.instance.currentUser;
+    final themeProvider = context.watch<ThemeProvider>();
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppColors.softGradient,
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(22, 18, 22, 120),
             children: [
-              Text(
-                'Analytics',
+              const Text(
+                'Settings',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.8,
                 ),
               ),
-              SizedBox(height: 6),
-              Text(
-                'Premium monthly money report',
+              const SizedBox(height: 6),
+              const Text(
+                'Manage your profile, reminders, theme, and app preferences.',
                 style: TextStyle(
-                  color: Colors.white54,
+                  color: AppColors.textSecondary,
                   fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 22),
+              _ProfileCard(
+                name: user?.displayName ?? 'PaySave User',
+                email: user?.email ?? 'No email',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRoutes.profile);
+                },
+              ),
+              const SizedBox(height: 22),
+              const _SectionTitle(title: 'Preferences'),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.currency_exchange_rounded,
+                title: 'Currency',
+                subtitle: 'Sri Lankan Rupees - Rs.',
+                color: AppColors.info,
+                onTap: () {
+                  _showInfo(
+                    context,
+                    'Currency',
+                    'PaySave currently uses Sri Lankan Rupees. Multi-currency support can be added later.',
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.notifications_active_rounded,
+                title: 'Reminder Preferences',
+                subtitle: 'Bill and installment reminders',
+                color: AppColors.warning,
+                onTap: () {
+                  _showInfo(
+                    context,
+                    'Reminder Preferences',
+                    'You can set reminder times when adding bills and installments.',
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _SettingsSwitchTile(
+                icon: Icons.dark_mode_rounded,
+                title: 'Dark Mode',
+                subtitle: 'Switch app theme',
+                color: AppColors.primary,
+                value: themeProvider.isDarkMode,
+                onChanged: (_) {
+                  themeProvider.toggleTheme();
+                },
+              ),
+              const SizedBox(height: 22),
+              const _SectionTitle(title: 'Data'),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.file_download_rounded,
+                title: 'Export Data',
+                subtitle: 'Coming soon',
+                color: AppColors.success,
+                onTap: () {
+                  _showInfo(
+                    context,
+                    'Export Data',
+                    'PDF or Excel export can be added in a later version.',
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.cloud_done_rounded,
+                title: 'Firebase Cloud Sync',
+                subtitle: 'Your data is saved under your account',
+                color: AppColors.primary,
+                onTap: () {
+                  _showInfo(
+                    context,
+                    'Firebase Cloud Sync',
+                    'Your monthly plans, bills, installments, savings, and records are stored in Firebase Firestore.',
+                  );
+                },
+              ),
+              const SizedBox(height: 22),
+              const _SectionTitle(title: 'About'),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.privacy_tip_rounded,
+                title: 'Privacy Policy',
+                subtitle: 'Planning app only',
+                color: AppColors.info,
+                onTap: () {
+                  _showInfo(
+                    context,
+                    'Privacy Policy',
+                    'PaySave is only a planning and reminder app. It does not transfer money, connect to banks, or process payments.',
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.info_rounded,
+                title: 'About PaySave',
+                subtitle: 'Version 1.0.0',
+                color: AppColors.primary,
+                onTap: () {
+                  _showInfo(
+                    context,
+                    'About PaySave',
+                    'PaySave helps users plan monthly income, savings, bills, and installment reminders.',
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                onPressed: () => _logout(context),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.danger,
+                  side: const BorderSide(color: AppColors.danger),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text(
+                  'Logout',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                'PaySave does not transfer money, connect to banks, or process payments.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textLight,
+                  fontSize: 12,
+                  height: 1.4,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
-        Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            color: AppColors.darkCard,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.darkBorder),
-          ),
-          child: const Icon(Icons.insights_rounded, color: AppColors.warning),
-        ),
-      ],
+      ),
+    );
+  }
+
+  void _showInfo(BuildContext context, String title, String message) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Okay'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
-class _DarkHeroCard extends StatelessWidget {
-  final double income;
-  final double expenses;
-  final double saved;
+class _ProfileCard extends StatelessWidget {
+  final String name;
+  final String email;
+  final VoidCallback onTap;
 
-  const _DarkHeroCard({
-    required this.income,
-    required this.expenses,
-    required this.saved,
+  const _ProfileCard({
+    required this.name,
+    required this.email,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final available = income - expenses - saved;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(34),
-        border: Border.all(color: AppColors.darkBorder),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.18),
-            blurRadius: 34,
-            offset: const Offset(0, 20),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -42,
-            right: -32,
-            child: Container(
-              height: 128,
-              width: 128,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.primary.withOpacity(0.12),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -30,
-            child: Container(
-              height: 120,
-              width: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.warning.withOpacity(0.10),
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Available After Records',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                CurrencyHelper.format(available),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 34,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                available >= 0
-                    ? 'You are still within a safe money range'
-                    : 'Your records show overspending',
-                style: TextStyle(
-                  color: available >= 0 ? Colors.white54 : AppColors.warning,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 22),
-              Row(
-                children: [
-                  Expanded(
-                    child: _HeroMiniItem(
-                      title: 'Spent',
-                      value: CurrencyHelper.format(expenses),
-                      color: AppColors.danger,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _HeroMiniItem(
-                      title: 'Saved',
-                      value: CurrencyHelper.format(saved),
-                      color: AppColors.success,
-                    ),
-                  ),
-                ],
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(30),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(30),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(AppSizes.paddingL),
+          decoration: BoxDecoration(
+            gradient: AppColors.cardPurpleGradient,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.22),
+                blurRadius: 30,
+                offset: const Offset(0, 18),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeroMiniItem extends StatelessWidget {
-  final String title;
-  final String value;
-  final Color color;
-
-  const _HeroMiniItem({
-    required this.title,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            title == 'Spent'
-                ? Icons.trending_down_rounded
-                : Icons.savings_rounded,
-            color: color,
-            size: 22,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BillsProgressCard extends StatelessWidget {
-  final double paidBills;
-  final double unpaidBills;
-
-  const _BillsProgressCard({
-    required this.paidBills,
-    required this.unpaidBills,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final total = paidBills + unpaidBills;
-    final progress = total <= 0 ? 0.0 : paidBills / total;
-
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.darkCard,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.darkBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Bills Paid vs Unpaid',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 21,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'Payment completion progress',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 22),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 12,
-              backgroundColor: AppColors.warning.withOpacity(0.22),
-              color: AppColors.success,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Row(
+          child: Row(
             children: [
+              Container(
+                height: 68,
+                width: 68,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: Colors.white,
+                  size: 34,
+                ),
+              ),
+              const SizedBox(width: 16),
               Expanded(
-                child: _BillProgressItem(
-                  title: 'Paid',
-                  value: CurrencyHelper.format(paidBills),
-                  color: AppColors.success,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      email,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Colors.white70,
+                size: 17,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(AppSizes.radiusL),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSizes.radiusL),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(AppSizes.paddingM),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(AppSizes.radiusL),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.035),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.13),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 24,
                 ),
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: _BillProgressItem(
-                  title: 'Unpaid',
-                  value: CurrencyHelper.format(unpaidBills),
-                  color: AppColors.warning,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: AppColors.textLight,
+                size: 15,
+              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSwitchTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SettingsSwitchTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.paddingM),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppSizes.radiusL),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.13),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  subtitle,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            activeColor: AppColors.primary,
+            onChanged: onChanged,
           ),
         ],
       ),
@@ -471,54 +512,21 @@ class _BillsProgressCard extends StatelessWidget {
   }
 }
 
-class _BillProgressItem extends StatelessWidget {
+class _SectionTitle extends StatelessWidget {
   final String title;
-  final String value;
-  final Color color;
 
-  const _BillProgressItem({
+  const _SectionTitle({
     required this.title,
-    required this.value,
-    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            title == 'Paid'
-                ? Icons.check_circle_rounded
-                : Icons.pending_actions_rounded,
-            color: color,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
+    return Text(
+      title,
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 18,
+        fontWeight: FontWeight.w900,
       ),
     );
   }

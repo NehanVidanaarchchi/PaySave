@@ -5,12 +5,12 @@ import '../../../core/constants/app_sizes.dart';
 import '../../../core/helpers/currency_helper.dart';
 import '../../../core/helpers/date_helper.dart';
 
-class InstallmentSummaryCard extends StatelessWidget {
+class AddInstallmentScreen extends StatelessWidget {
   final double upcomingAmount;
   final DateTime? nextPaymentDate;
   final int activePlans;
 
-  const InstallmentSummaryCard({
+  const AddInstallmentScreen({
     super.key,
     required this.upcomingAmount,
     required this.nextPaymentDate,

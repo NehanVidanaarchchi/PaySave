@@ -64,8 +64,8 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String profile = '/profile';
 
-  static Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    switch (settings.name) {
+  static Route<dynamic> onGenerateRoute(RouteSettings routeSettings) {
+    switch (routeSettings.name) {
       case splash:
         return _page(const SplashScreen());
 
@@ -97,17 +97,27 @@ class AppRoutes {
         return _page(const AddBillScreen());
 
       case editBill:
-        final billId = settings.arguments as String?;
+        final billId = routeSettings.arguments as String?;
         return _page(EditBillScreen(billId: billId));
 
       case installments:
-        return _page(const InstallmentsScreen());
+        return _page(
+          InstallmentsScreen(
+            upcomingAmount: 0,
+            nextPaymentDate: DateTime.now(),
+            activePlans: 0,
+          ),
+        );
 
       case addInstallment:
-        return _page(const AddInstallmentScreen());
+        return _page(AddInstallmentScreen(
+          upcomingAmount: 0,
+          nextPaymentDate: DateTime.now(),
+          activePlans: 0,
+        ));
 
       case installmentDetails:
-        final installmentId = settings.arguments as String?;
+        final installmentId = routeSettings.arguments as String?;
         return _page(
           InstallmentDetailsScreen(installmentId: installmentId),
         );

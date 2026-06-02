@@ -23,27 +23,32 @@ class NotificationService {
       requestSoundPermission: true,
     );
 
-    const settings = InitializationSettings(
+    const initializationSettings = InitializationSettings(
       android: androidSettings,
       iOS: iosSettings,
     );
 
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings: initializationSettings,
+    );
+
     await requestPermissions();
   }
 
   Future<void> requestPermissions() async {
     await _plugin
         .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
 
     await _plugin
         .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin
-        >()
-        ?.requestPermissions(alert: true, badge: true, sound: true);
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
   }
 
   Future<void> showInstantNotification({
@@ -51,7 +56,12 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    await _plugin.show(id, title, body, _notificationDetails());
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: _notificationDetails(),
+    );
   }
 
   Future<void> scheduleReminder({
@@ -60,26 +70,29 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
-    final tzDate = tz.TZDateTime.from(scheduledDate, tz.local);
+    final tzDate = tz.TZDateTime.from(
+      scheduledDate,
+      tz.local,
+    );
 
     if (tzDate.isBefore(tz.TZDateTime.now(tz.local))) {
       return;
     }
 
     await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tzDate,
-      _notificationDetails(),
+      id: id,
+      title: title,
+      body: body,
+      scheduledDate: tzDate,
+      notificationDetails: _notificationDetails(),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
   Future<void> cancelNotification(int id) async {
-    await _plugin.cancel(id);
+    await _plugin.cancel(
+      id: id,
+    );
   }
 
   Future<void> cancelAll() async {
@@ -97,6 +110,9 @@ class NotificationService {
 
     const iosDetails = DarwinNotificationDetails();
 
-    return const NotificationDetails(android: androidDetails, iOS: iosDetails);
+    return const NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
   }
 }

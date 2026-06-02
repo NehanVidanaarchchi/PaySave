@@ -1,30 +1,105 @@
-import '../firebase/firebase_expense_service.dart';
-import '../models/expense_model.dart';
+import 'package:flutter/material.dart';
 
-class ExpenseRepository {
-  final FirebaseExpenseService _expenseService = FirebaseExpenseService();
+import '../data/repositories/auth_repository.dart';
 
-  Future<void> addExpense(ExpenseModel expense) async {
-    await _expenseService.addExpense(expense);
+class AuthProvider extends ChangeNotifier {
+  final AuthRepository _repository = AuthRepository();
+
+  bool isLoading = false;
+  String? errorMessage;
+
+  bool get isLoggedIn => _repository.currentUser != null;
+  String? get currentUserId => _repository.currentUserId;
+
+  void _setLoading(bool value) {
+    isLoading = value;
+    notifyListeners();
   }
 
-  Future<void> updateExpense(ExpenseModel expense) async {
-    await _expenseService.updateExpense(expense);
+  void _setError(String? message) {
+    errorMessage = message;
+    notifyListeners();
   }
 
-  Future<ExpenseModel?> getExpenseById(String expenseId) async {
-    return _expenseService.getExpenseById(expenseId);
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repository.register(
+        name: name,
+        email: email,
+        password: password,
+      );
+
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setLoading(false);
+      _setError(e.toString());
+      return false;
+    }
   }
 
-  Stream<List<ExpenseModel>> watchExpenses() {
-    return _expenseService.watchExpenses();
+  Future<bool> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repository.login(
+        email: email,
+        password: password,
+      );
+
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setLoading(false);
+      _setError(e.toString());
+      return false;
+    }
   }
 
-  Stream<List<ExpenseModel>> watchExpensesByMonth({required DateTime month}) {
-    return _expenseService.watchExpensesByMonth(month: month);
+  Future<bool> sendPasswordResetEmail({
+    required String email,
+  }) async {
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repository.sendPasswordResetEmail(email: email);
+
+      _setLoading(false);
+      return true;
+    } catch (e) {
+      _setLoading(false);
+      _setError(e.toString());
+      return false;
+    }
   }
 
-  Future<void> deleteExpense(String expenseId) async {
-    await _expenseService.deleteExpense(expenseId);
+  Future<void> logout() async {
+    try {
+      _setLoading(true);
+      _setError(null);
+
+      await _repository.logout();
+
+      _setLoading(false);
+    } catch (e) {
+      _setLoading(false);
+      _setError(e.toString());
+    }
+  }
+
+  void clearError() {
+    _setError(null);
   }
 }

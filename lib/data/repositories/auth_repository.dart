@@ -48,12 +48,22 @@ class AuthRepository {
     return user;
   }
 
-  Future<void> login({required String email, required String password}) async {
-    await _authService.login(email: email, password: password);
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    await _authService.login(
+      email: email,
+      password: password,
+    );
   }
 
-  Future<void> sendPasswordResetEmail({required String email}) async {
-    await _authService.sendPasswordResetEmail(email: email);
+  Future<void> sendPasswordResetEmail({
+    required String email,
+  }) async {
+    await _authService.sendPasswordResetEmail(
+      email: email,
+    );
   }
 
   Future<void> logout() async {
