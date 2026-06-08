@@ -257,7 +257,6 @@ class _DashboardView extends StatelessWidget {
                         const SizedBox(height: 14),
                         const _UpcomingReminders(),
                         const SizedBox(height: 28),
-                        const _SafetyNoteCard(),
                       ],
                     ),
                   ),
@@ -591,48 +590,6 @@ class _UpcomingReminders extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-class _SafetyNoteCard extends StatelessWidget {
-  const _SafetyNoteCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSizes.paddingM),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryDark.withValues(alpha: 0.18),
-            blurRadius: 24,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: const Row(
-        children: [
-          Icon(
-            Icons.verified_user_rounded,
-            color: Colors.white,
-          ),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'PaySave does not transfer money or connect to banks. It only helps you plan and remember payments.',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                height: 1.45,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
