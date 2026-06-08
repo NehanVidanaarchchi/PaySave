@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,8 +17,8 @@ import '../../providers/monthly_plan_provider.dart';
 
 import '../bills/bills_screen.dart';
 import '../planner/monthly_plan_screen.dart';
-import '../reports/reports_screen.dart';
 import '../saving/savings_screen.dart';
+import '../settings/settings_screen.dart';
 
 import 'widgets/balance_card.dart';
 import 'widgets/money_summary_grid.dart';
@@ -39,25 +40,31 @@ class _HomeScreenState extends State<HomeScreen> {
     const MonthlyPlanScreen(),
     const BillsScreen(),
     const SavingsScreen(),
-    const ReportsScreen(),
+    const SettingsScreen(),
   ];
+
+  void _changePage(int index) {
+    if (index < 0 || index >= _pages.length) return;
+
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final safeIndex = _currentIndex.clamp(0, _pages.length - 1);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       extendBody: true,
       body: IndexedStack(
-        index: _currentIndex,
+        index: safeIndex,
         children: _pages,
       ),
       bottomNavigationBar: _PaySaveBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        currentIndex: safeIndex,
+        onTap: _changePage,
       ),
     );
   }
@@ -120,8 +127,8 @@ class _PaySaveBottomNavBar extends StatelessWidget {
               onTap: () => onTap(3),
             ),
             _BottomNavItem(
-              icon: Icons.bar_chart_rounded,
-              label: 'Reports',
+              icon: Icons.settings_rounded,
+              label: 'Settings',
               isSelected: currentIndex == 4,
               onTap: () => onTap(4),
             ),
@@ -271,76 +278,100 @@ class _HomeHeader extends StatelessWidget {
     required this.monthText,
   });
 
+  String _getUserName(User? user) {
+    final displayName = user?.displayName?.trim();
+
+    if (displayName != null && displayName.isNotEmpty) {
+      return displayName.split(' ').first;
+    }
+
+    final email = user?.email?.trim();
+
+    if (email != null && email.isNotEmpty) {
+      return email.split('@').first;
+    }
+
+    return 'User';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Hi, Nehan 👋',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                'Monthly Overview',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.8,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.75),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white),
-                ),
-                child: Text(
-                  monthText,
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      initialData: FirebaseAuth.instance.currentUser,
+      builder: (context, snapshot) {
+        final userName = _getUserName(snapshot.data);
+
+        return Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hi, $userName 👋',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'Monthly Overview',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white),
+                    ),
+                    child: Text(
+                      monthText,
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
+            ),
+            Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: AppColors.primary,
-          ),
-        ),
-      ],
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

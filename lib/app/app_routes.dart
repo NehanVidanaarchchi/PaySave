@@ -22,8 +22,6 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/planner/monthly_plan_screen.dart';
 import '../features/planner/monthly_plan_setup_screen.dart';
 
-import '../features/reports/reports_screen.dart';
-
 import '../features/saving/add_saving_goal_screen.dart';
 import '../features/saving/savings_screen.dart';
 
@@ -58,8 +56,6 @@ class AppRoutes {
 
   static const String expenses = '/expenses';
   static const String addExpense = '/add-expense';
-
-  static const String reports = '/reports';
 
   static const String settings = '/settings';
   static const String profile = '/profile';
@@ -133,9 +129,6 @@ class AppRoutes {
 
       case addExpense:
         return _page(const AddExpenseScreen());
-
-      case reports:
-        return _page(const ReportsScreen());
 
       case settings:
         return _page(const SettingsScreen());

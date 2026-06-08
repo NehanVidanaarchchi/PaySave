@@ -133,36 +133,6 @@ class SettingsScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 22),
-              const _SectionTitle(title: 'Data'),
-              const SizedBox(height: 12),
-              _SettingsTile(
-                icon: Icons.file_download_rounded,
-                title: 'Export Data',
-                subtitle: 'Coming soon',
-                color: AppColors.success,
-                onTap: () {
-                  _showInfo(
-                    context,
-                    'Export Data',
-                    'PDF or Excel export can be added in a later version.',
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              _SettingsTile(
-                icon: Icons.cloud_done_rounded,
-                title: 'Firebase Cloud Sync',
-                subtitle: 'Your data is saved under your account',
-                color: AppColors.primary,
-                onTap: () {
-                  _showInfo(
-                    context,
-                    'Firebase Cloud Sync',
-                    'Your monthly plans, bills, installments, savings, and records are stored in Firebase Firestore.',
-                  );
-                },
-              ),
-              const SizedBox(height: 22),
               const _SectionTitle(title: 'About'),
               const SizedBox(height: 12),
               _SettingsTile(
