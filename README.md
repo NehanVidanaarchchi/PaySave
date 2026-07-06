@@ -129,56 +129,6 @@ lib/
 
 ---
 
-## Firebase Data Structure
-
-```text
-users/{uid}
-users/{uid}/monthlyPlans/{planId}
-users/{uid}/bills/{billId}
-users/{uid}/installments/{installmentId}
-users/{uid}/savings/{savingGoalId}
-users/{uid}/expenses/{expenseId}
-```
-
----
-
-## Firestore Rules
-
-```js
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    match /users/{userId} {
-      allow read, write: if request.auth != null
-                         && request.auth.uid == userId;
-
-      match /{document=**} {
-        allow read, write: if request.auth != null
-                           && request.auth.uid == userId;
-      }
-    }
-  }
-}
-```
-
----
-
-## Android Permissions
-
-PaySave uses local notifications for bill and installment reminders.
-
-Add these permissions inside `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-<uses-permission android:name="android.permission.VIBRATE" />
-```
-
----
-
 ## Getting Started
 
 ### 1. Clone the repository
@@ -278,45 +228,6 @@ dart run flutter_launcher_icons
 
 ---
 
-## Screenshots
-
-Screenshots are not attached yet.
-
-When screenshots are available, create a `screenshots/` folder and add them like this:
-
-```text
-screenshots/home.png
-screenshots/planner.png
-screenshots/bills.png
-screenshots/savings.png
-screenshots/settings.png
-```
-
-Then add them to this README:
-
-```md
-![Home Screen](screenshots/home.png)
-![Planner Screen](screenshots/planner.png)
-![Bills Screen](screenshots/bills.png)
-![Savings Screen](screenshots/savings.png)
-![Settings Screen](screenshots/settings.png)
-```
-
----
-
-## Future Improvements
-
-- Monthly analytics dashboard
-- PDF report export
-- More chart visualizations
-- Custom budget categories
-- Better offline support
-- Reminder repeat customization
-- App lock or biometric protection
-- Improved profile editing
-
----
-
 ## Project Purpose
 
 This project was built as a portfolio-ready Flutter mobile app to demonstrate:
@@ -338,8 +249,3 @@ This project was built as a portfolio-ready Flutter mobile app to demonstrate:
 Built with Flutter and Firebase.
 
 ---
-
-## License
-
-This project is for educational and portfolio use.  
-You can update this section based on your preferred license.
