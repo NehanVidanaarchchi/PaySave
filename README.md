@@ -1,23 +1,22 @@
 # PaySave – Personal Finance Planner App
 
-PaySave is a premium personal finance planner mobile app built with **Flutter** and **Firebase**.  
-It helps users plan monthly income, track bills, manage expenses, set saving goals, and create installment reminders.
+PaySave is a premium Flutter mobile app for personal finance planning. It helps users plan monthly income, track bills, manage expenses, set saving goals, and create installment reminders.
 
-> PaySave is a planning and reminder app only. It does **not** transfer money, connect to bank accounts, process payments, or store wallet balances.
+> **Note:** PaySave is a planning and reminder app only. It does **not** transfer money, connect to bank accounts, process payments, or store real wallet balances.
 
 ---
 
-## App Overview
+## Overview
 
 PaySave is designed for users who want a simple way to control monthly spending and avoid missing important payments.
 
-Users can manually enter their income, expenses, bills, saving goals, and installment plans. The app then calculates the remaining balance and daily safe spending amount.
+Users can manually enter their monthly income, expenses, bills, saving goals, and installment plans. The app calculates the remaining balance and daily safe spending amount, helping users understand how much they can safely spend each day.
 
 ---
 
 ## Key Features
 
-- User registration and login with Firebase Authentication
+- Firebase Authentication login and registration
 - Monthly income and budget planning
 - Remaining balance calculation
 - Daily safe spending calculation
@@ -25,27 +24,26 @@ Users can manually enter their income, expenses, bills, saving goals, and instal
 - Installment payment reminders
 - Saving goal tracking
 - Expense tracking
-- Premium dark UI design
-- Firebase Firestore cloud database
+- Premium dark mobile UI
 - Local notification support
+- Firebase Firestore cloud database
 - Profile and settings pages
-- Mobile responsive Flutter UI
+- App icon and image assets support
 
 ---
 
 ## What PaySave Does Not Do
 
-PaySave is not a banking or payment app.
+PaySave is not a banking app or payment app.
 
 It does not:
 
 - Transfer money
-- Send money
-- Receive money
+- Send or receive money
 - Connect to bank accounts
-- Store real wallet balance
+- Store real wallet balances
 - Process online payments
-- Provide financial investment advice
+- Provide investment advice
 
 ---
 
@@ -54,34 +52,38 @@ It does not:
 | Technology | Purpose |
 |---|---|
 | Flutter | Cross-platform mobile app development |
-| Dart | Programming language |
+| Dart | Main programming language |
+| Firebase Core | Firebase initialization |
 | Firebase Authentication | User login and registration |
-| Cloud Firestore | Cloud database |
-| Firebase Storage | Optional file/image storage |
+| Cloud Firestore | User data storage |
+| Firebase Storage | Optional image/file storage |
 | Provider | State management |
-| flutter_local_notifications | Local reminders |
-| fl_chart | Charts and reports |
+| Flutter Local Notifications | Bill and installment reminders |
+| Timezone | Notification scheduling support |
+| fl_chart | Charts and analytics UI |
 | intl | Currency and date formatting |
 | connectivity_plus | Internet connection checking |
+| shared_preferences | Local app preferences |
+| flutter_launcher_icons | App icon generation |
 
 ---
 
 ## Main App Modules
 
 ### Authentication
-Users can register, login, reset password, and logout.
+Users can register, login, reset their password, and logout.
 
 ### Home Dashboard
-Shows monthly overview, remaining balance, daily safe spending, quick actions, and upcoming reminders.
+Shows the monthly overview, remaining balance, daily safe spending, quick actions, and upcoming reminders.
 
 ### Monthly Planner
-Users can enter income, rent, bills budget, savings target, and other spending categories.
+Allows users to enter monthly income, rent, bills budget, saving target, and other budget categories.
 
 ### Bills
 Users can add bills, set due dates, set reminder times, and mark bills as paid or unpaid.
 
 ### Installments
-Users can add installment plans, track payment progress, and receive reminders.
+Users can create installment plans, track payment progress, and receive payment reminders.
 
 ### Savings
 Users can create saving goals and track progress toward each goal.
@@ -90,7 +92,7 @@ Users can create saving goals and track progress toward each goal.
 Users can manually add expenses and monitor spending.
 
 ### Settings and Profile
-Users can view account information and logout.
+Users can view account details, app information, and logout.
 
 ---
 
@@ -127,7 +129,7 @@ lib/
 
 ---
 
-## Firebase Structure
+## Firebase Data Structure
 
 ```text
 users/{uid}
@@ -141,8 +143,6 @@ users/{uid}/expenses/{expenseId}
 ---
 
 ## Firestore Rules
-
-Use these rules for user-protected data:
 
 ```js
 rules_version = '2';
@@ -169,7 +169,7 @@ service cloud.firestore {
 
 PaySave uses local notifications for bill and installment reminders.
 
-Required Android permissions:
+Add these permissions inside `android/app/src/main/AndroidManifest.xml`:
 
 ```xml
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -184,8 +184,8 @@ Required Android permissions:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/pay_save.git
-cd pay_save
+git clone https://github.com/NehanVidanaarchchi/PaySave.git
+cd PaySave
 ```
 
 ### 2. Install dependencies
@@ -234,7 +234,9 @@ flutter run
 
 ## Important Setup Notes
 
-Make sure your Android application ID matches Firebase:
+Make sure your Android application ID matches the Firebase Android app.
+
+Current package name:
 
 ```text
 com.example.pay_save
@@ -252,13 +254,13 @@ flutterfire configure
 
 ## App Icon and Assets
 
-Assets should be placed inside:
+Assets are stored inside:
 
 ```text
 assets/images/
 ```
 
-Example `pubspec.yaml` asset setup:
+Example `pubspec.yaml` setup:
 
 ```yaml
 flutter:
@@ -268,11 +270,19 @@ flutter:
     - assets/images/
 ```
 
+To generate launcher icons, run:
+
+```bash
+dart run flutter_launcher_icons
+```
+
 ---
 
 ## Screenshots
 
-Add screenshots here after uploading them to GitHub.
+Screenshots are not attached yet.
+
+When screenshots are available, create a `screenshots/` folder and add them like this:
 
 ```text
 screenshots/home.png
@@ -282,10 +292,14 @@ screenshots/savings.png
 screenshots/settings.png
 ```
 
-Example:
+Then add them to this README:
 
 ```md
 ![Home Screen](screenshots/home.png)
+![Planner Screen](screenshots/planner.png)
+![Bills Screen](screenshots/bills.png)
+![Savings Screen](screenshots/savings.png)
+![Settings Screen](screenshots/settings.png)
 ```
 
 ---
@@ -293,12 +307,13 @@ Example:
 ## Future Improvements
 
 - Monthly analytics dashboard
-- Export reports as PDF
+- PDF report export
 - More chart visualizations
-- Custom categories
-- Cloud backup improvements
-- Reminder repeat customization
+- Custom budget categories
 - Better offline support
+- Reminder repeat customization
+- App lock or biometric protection
+- Improved profile editing
 
 ---
 
@@ -309,7 +324,8 @@ This project was built as a portfolio-ready Flutter mobile app to demonstrate:
 - Flutter UI development
 - Firebase Authentication
 - Firestore database design
-- State management using Provider
+- Provider state management
+- Local notification scheduling
 - Clean project structure
 - Real-world finance planning features
 - Mobile app publishing readiness
