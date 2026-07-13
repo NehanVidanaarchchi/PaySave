@@ -22,6 +22,7 @@ import '../features/planner/monthly_plan_setup_screen.dart';
 
 import '../features/records/add_money_record_screen.dart';
 
+import '../features/saving/add_saving_goal_screen.dart';
 import '../features/saving/savings_screen.dart';
 
 import '../features/settings/profile_screen.dart';
@@ -125,11 +126,7 @@ class AppRoutes {
         return _page(const SavingsScreen());
 
       case addSavingGoal:
-        return _page(
-          const AddMoneyRecordScreen(
-            initialType: MoneyRecordModel.typeSaving,
-          ),
-        );
+        return _page(const AddSavingGoalScreen());
 
       case expenses:
         return _page(const ExpensesScreen());

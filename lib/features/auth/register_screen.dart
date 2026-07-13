@@ -52,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (success) {
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AppRoutes.monthlyPlanSetup,
+        AppRoutes.home,
         (_) => false,
       );
     } else {

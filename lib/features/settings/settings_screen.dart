@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
+import '../../core/constants/firebase_collections.dart';
 import '../../providers/theme_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -37,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
     if (confirm != true) return;
     if (!context.mounted) return;
 
-    // await context.read<AuthProvider>().logout();
+    await FirebaseAuth.instance.signOut();
 
     if (!context.mounted) return;
 
@@ -45,6 +47,152 @@ class SettingsScreen extends StatelessWidget {
       context,
       AppRoutes.login,
       (_) => false,
+    );
+  }
+
+  Future<void> _cleanUserData(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Clean all data?'),
+          content: const Text(
+            'This will remove your records, bills, Koko payments, goals, expenses, and old monthly plans. Your account will not be deleted. This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'Clean Data',
+                style: TextStyle(
+                  color: AppColors.danger,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+    if (!context.mounted) return;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return const Center(
+          child: CircularProgressIndicator(
+            color: AppColors.primary,
+          ),
+        );
+      },
+    );
+
+    try {
+      await _deleteCurrentUserData();
+
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All PaySave data cleaned successfully.'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.success,
+        ),
+      );
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (_) => false,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to clean data: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteCurrentUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw Exception('User is not logged in');
+    }
+
+    final userDoc = FirebaseFirestore.instance
+        .collection(FirebaseCollections.users)
+        .doc(user.uid);
+
+    final collectionsToClean = [
+      FirebaseCollections.moneyRecords,
+      FirebaseCollections.monthlyPlans,
+      FirebaseCollections.bills,
+      FirebaseCollections.installments,
+      FirebaseCollections.savings,
+      FirebaseCollections.expenses,
+    ];
+
+    for (final collectionName in collectionsToClean) {
+      await _deleteCollection(userDoc.collection(collectionName));
+    }
+  }
+
+  Future<void> _deleteCollection(
+    CollectionReference<Map<String, dynamic>> collection,
+  ) async {
+    while (true) {
+      final snapshot = await collection.limit(450).get();
+
+      if (snapshot.docs.isEmpty) {
+        break;
+      }
+
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+
+      if (snapshot.docs.length < 450) {
+        break;
+      }
+    }
+  }
+
+  void _showInfo(BuildContext context, String title, String message) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Okay'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -63,7 +211,7 @@ class SettingsScreen extends StatelessWidget {
           bottom: false,
           child: ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 120),
+            padding: const EdgeInsets.fromLTRB(22, 18, 22, 140),
             children: [
               const Text(
                 'Settings',
@@ -76,11 +224,12 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               const Text(
-                'Manage your profile, reminders, theme, and app preferences.',
+                'Manage your profile, reminders, theme, data, and app preferences.',
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
+                  height: 1.35,
                 ),
               ),
               const SizedBox(height: 22),
@@ -103,7 +252,7 @@ class SettingsScreen extends StatelessWidget {
                   _showInfo(
                     context,
                     'Currency',
-                    'PaySave currently uses Sri Lankan Rupees. Multi-currency support can be added later.',
+                    'PaySave currently uses Sri Lankan Rupees.',
                   );
                 },
               ),
@@ -111,13 +260,13 @@ class SettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.notifications_active_rounded,
                 title: 'Reminder Preferences',
-                subtitle: 'Bill and installment reminders',
+                subtitle: 'Bill and Koko payment reminders',
                 color: AppColors.warning,
                 onTap: () {
                   _showInfo(
                     context,
                     'Reminder Preferences',
-                    'You can set reminder times when adding bills and installments.',
+                    'You can set reminder dates when adding bills and Koko payments.',
                   );
                 },
               ),
@@ -131,6 +280,16 @@ class SettingsScreen extends StatelessWidget {
                 onChanged: (_) {
                   themeProvider.toggleTheme();
                 },
+              ),
+              const SizedBox(height: 22),
+              const _SectionTitle(title: 'Data Management'),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.cleaning_services_rounded,
+                title: 'Clean Data',
+                subtitle: 'Remove records, bills, goals, expenses, and plans',
+                color: AppColors.danger,
+                onTap: () => _cleanUserData(context),
               ),
               const SizedBox(height: 22),
               const _SectionTitle(title: 'About'),
@@ -158,7 +317,7 @@ class SettingsScreen extends StatelessWidget {
                   _showInfo(
                     context,
                     'About PaySave',
-                    'PaySave helps users plan monthly income, savings, bills, and installment reminders.',
+                    'PaySave helps users plan income, savings goals, bills, and Koko-style installment reminders.',
                   );
                 },
               ),
@@ -196,24 +355,6 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _showInfo(BuildContext context, String title, String message) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Okay'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 class _ProfileCard extends StatelessWidget {
@@ -242,7 +383,7 @@ class _ProfileCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.22),
+                color: AppColors.primary.withValues(alpha: 0.22),
                 blurRadius: 30,
                 offset: const Offset(0, 18),
               ),
@@ -254,7 +395,7 @@ class _ProfileCard extends StatelessWidget {
                 height: 68,
                 width: 68,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Icon(
@@ -334,7 +475,7 @@ class _SettingsTile extends StatelessWidget {
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.035),
+                color: Colors.black.withValues(alpha: 0.035),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -346,7 +487,7 @@ class _SettingsTile extends StatelessWidget {
                 height: 50,
                 width: 50,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.13),
+                  color: color.withValues(alpha: 0.13),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Icon(
@@ -372,10 +513,12 @@ class _SettingsTile extends StatelessWidget {
                     const SizedBox(height: 5),
                     Text(
                       subtitle,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 12,
+                        height: 1.35,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -422,7 +565,7 @@ class _SettingsSwitchTile extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.035),
+            color: Colors.black.withValues(alpha: 0.035),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -434,7 +577,7 @@ class _SettingsSwitchTile extends StatelessWidget {
             height: 50,
             width: 50,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.13),
+              color: color.withValues(alpha: 0.13),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Icon(
@@ -472,7 +615,7 @@ class _SettingsSwitchTile extends StatelessWidget {
           ),
           Switch(
             value: value,
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
             onChanged: onChanged,
           ),
         ],
@@ -494,8 +637,9 @@ class _SectionTitle extends StatelessWidget {
       title,
       style: const TextStyle(
         color: AppColors.textPrimary,
-        fontSize: 18,
+        fontSize: 19,
         fontWeight: FontWeight.w900,
+        letterSpacing: -0.3,
       ),
     );
   }
