@@ -70,8 +70,6 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
         return 'Bill';
       case MoneyRecordModel.typeExpense:
         return 'General';
-      case MoneyRecordModel.typeSaving:
-        return 'Saving';
       case MoneyRecordModel.typeInstallment:
         return 'Installment';
       default:
