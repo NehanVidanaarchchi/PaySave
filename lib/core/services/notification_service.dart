@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as timezone_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -36,19 +37,23 @@ class NotificationService {
   }
 
   Future<void> requestPermissions() async {
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
+    try {
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
 
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+    } catch (e) {
+      debugPrint('Notification permission error: $e');
+    }
   }
 
   Future<void> showInstantNotification({
@@ -56,12 +61,16 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
-    await _plugin.show(
-      id: id,
-      title: title,
-      body: body,
-      notificationDetails: _notificationDetails(),
-    );
+    try {
+      await _plugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: _notificationDetails(),
+      );
+    } catch (e) {
+      debugPrint('Show notification error: $e');
+    }
   }
 
   Future<void> scheduleReminder({
@@ -70,33 +79,48 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
-    final tzDate = tz.TZDateTime.from(
-      scheduledDate,
-      tz.local,
-    );
+    try {
+      final tzScheduledDate = tz.TZDateTime.from(
+        scheduledDate,
+        tz.local,
+      );
 
-    if (tzDate.isBefore(tz.TZDateTime.now(tz.local))) {
-      return;
+      final now = tz.TZDateTime.now(tz.local);
+
+      if (tzScheduledDate.isBefore(now)) {
+        debugPrint('Reminder skipped because selected time is in the past');
+        return;
+      }
+
+      await _plugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: tzScheduledDate,
+        notificationDetails: _notificationDetails(),
+
+        // FIX: does not need exact alarm permission
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('Schedule reminder error: $e');
     }
-
-    await _plugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: tzDate,
-      notificationDetails: _notificationDetails(),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
   }
 
   Future<void> cancelNotification(int id) async {
-    await _plugin.cancel(
-      id: id,
-    );
+    try {
+      await _plugin.cancel(id: id);
+    } catch (e) {
+      debugPrint('Cancel notification error: $e');
+    }
   }
 
   Future<void> cancelAll() async {
-    await _plugin.cancelAll();
+    try {
+      await _plugin.cancelAll();
+    } catch (e) {
+      debugPrint('Cancel all notifications error: $e');
+    }
   }
 
   NotificationDetails _notificationDetails() {
@@ -106,6 +130,8 @@ class NotificationService {
       channelDescription: 'Bill and installment reminder notifications',
       importance: Importance.high,
       priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
     );
 
     const iosDetails = DarwinNotificationDetails();

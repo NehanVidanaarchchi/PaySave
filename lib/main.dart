@@ -10,6 +10,7 @@ import 'providers/auth_provider.dart';
 import 'providers/bill_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/installment_provider.dart';
+import 'providers/money_record_provider.dart';
 import 'providers/monthly_plan_provider.dart';
 import 'providers/saving_provider.dart';
 import 'providers/theme_provider.dart';
@@ -22,19 +23,45 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await NotificationService.instance.init();
+  try {
+    await NotificationService.instance.init();
+  } catch (e) {
+    debugPrint('Notification init error: $e');
+  }
+
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-        ChangeNotifierProvider(create: (_) => MonthlyPlanProvider()),
-        ChangeNotifierProvider(create: (_) => BillProvider()),
-        ChangeNotifierProvider(create: (_) => InstallmentProvider()),
-        ChangeNotifierProvider(create: (_) => SavingProvider()),
-        ChangeNotifierProvider(create: (_) => ExpenseProvider()),
+        ChangeNotifierProvider<ThemeProvider>.value(
+          value: themeProvider,
+        ),
+        ChangeNotifierProvider<AuthProvider>(
+          create: (_) => AuthProvider(),
+        ),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider(),
+        ),
+        ChangeNotifierProvider<MonthlyPlanProvider>(
+          create: (_) => MonthlyPlanProvider(),
+        ),
+        ChangeNotifierProvider<BillProvider>(
+          create: (_) => BillProvider(),
+        ),
+        ChangeNotifierProvider<InstallmentProvider>(
+          create: (_) => InstallmentProvider(),
+        ),
+        ChangeNotifierProvider<SavingProvider>(
+          create: (_) => SavingProvider(),
+        ),
+        ChangeNotifierProvider<ExpenseProvider>(
+          create: (_) => ExpenseProvider(),
+        ),
+        ChangeNotifierProvider<MoneyRecordProvider>(
+          create: (_) => MoneyRecordProvider(),
+        ),
       ],
       child: const PaySaveApp(),
     ),

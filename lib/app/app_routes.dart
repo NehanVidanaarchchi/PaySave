@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 
+import '../data/models/money_record_model.dart';
+
 import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_screen.dart';
 
-import '../features/bills/add_bill_screen.dart';
 import '../features/bills/bills_screen.dart';
 import '../features/bills/edit_bill_screen.dart';
 
-import '../features/expenses/add_expense_screen.dart';
 import '../features/expenses/expenses_screen.dart';
 
 import '../features/home/home_screen.dart';
 
-import '../features/installments/add_installment_screen.dart';
 import '../features/installments/installment_details_screen.dart';
-import '../features/installments/installments_screen.dart';
 
 import '../features/onboarding/onboarding_screen.dart';
 
 import '../features/planner/monthly_plan_screen.dart';
 import '../features/planner/monthly_plan_setup_screen.dart';
 
-import '../features/saving/add_saving_goal_screen.dart';
+import '../features/records/add_money_record_screen.dart';
+
 import '../features/saving/savings_screen.dart';
 
 import '../features/settings/profile_screen.dart';
@@ -57,6 +56,8 @@ class AppRoutes {
   static const String expenses = '/expenses';
   static const String addExpense = '/add-expense';
 
+  static const String addMoneyRecord = '/add-money-record';
+
   static const String settings = '/settings';
   static const String profile = '/profile';
 
@@ -90,7 +91,11 @@ class AppRoutes {
         return _page(const BillsScreen());
 
       case addBill:
-        return _page(const AddBillScreen());
+        return _page(
+          const AddMoneyRecordScreen(
+            initialType: MoneyRecordModel.typeBill,
+          ),
+        );
 
       case editBill:
         final billId = routeSettings.arguments as String?;
@@ -98,19 +103,17 @@ class AppRoutes {
 
       case installments:
         return _page(
-          InstallmentsScreen(
-            upcomingAmount: 0,
-            nextPaymentDate: DateTime.now(),
-            activePlans: 0,
+          const AddMoneyRecordScreen(
+            initialType: MoneyRecordModel.typeInstallment,
           ),
         );
 
       case addInstallment:
-        return _page(AddInstallmentScreen(
-          upcomingAmount: 0,
-          nextPaymentDate: DateTime.now(),
-          activePlans: 0,
-        ));
+        return _page(
+          const AddMoneyRecordScreen(
+            initialType: MoneyRecordModel.typeInstallment,
+          ),
+        );
 
       case installmentDetails:
         final installmentId = routeSettings.arguments as String?;
@@ -122,13 +125,31 @@ class AppRoutes {
         return _page(const SavingsScreen());
 
       case addSavingGoal:
-        return _page(const AddSavingGoalScreen());
+        return _page(
+          const AddMoneyRecordScreen(
+            initialType: MoneyRecordModel.typeSaving,
+          ),
+        );
 
       case expenses:
         return _page(const ExpensesScreen());
 
       case addExpense:
-        return _page(const AddExpenseScreen());
+        return _page(
+          const AddMoneyRecordScreen(
+            initialType: MoneyRecordModel.typeExpense,
+          ),
+        );
+
+      case addMoneyRecord:
+        final args = routeSettings.arguments;
+        final type = args is String ? args : null;
+
+        return _page(
+          AddMoneyRecordScreen(
+            initialType: type,
+          ),
+        );
 
       case settings:
         return _page(const SettingsScreen());

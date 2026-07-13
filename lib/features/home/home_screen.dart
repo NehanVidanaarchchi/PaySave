@@ -7,21 +7,15 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/helpers/currency_helper.dart';
 import '../../core/helpers/date_helper.dart';
-import '../../core/widgets/empty_state.dart';
-import '../../data/models/bill_model.dart';
-import '../../data/models/installment_model.dart';
-import '../../data/models/monthly_plan_model.dart';
-import '../../providers/bill_provider.dart';
-import '../../providers/installment_provider.dart';
-import '../../providers/monthly_plan_provider.dart';
+import '../../data/models/money_record_model.dart';
+import '../../providers/money_record_provider.dart';
 
 import '../bills/bills_screen.dart';
-import '../planner/monthly_plan_screen.dart';
+import '../records/add_money_record_screen.dart';
 import '../saving/savings_screen.dart';
 import '../settings/settings_screen.dart';
 
 import 'widgets/balance_card.dart';
-import 'widgets/money_summary_grid.dart';
 import 'widgets/quick_action_card.dart';
 import 'widgets/upcoming_payment_card.dart';
 
@@ -37,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late final List<Widget> _pages = [
     const _DashboardView(),
-    const MonthlyPlanScreen(),
+    const AddMoneyRecordScreen(),
     const BillsScreen(),
     const SavingsScreen(),
     const SettingsScreen(),
@@ -53,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final safeIndex = _currentIndex.clamp(0, _pages.length - 1);
+    final int safeIndex = _currentIndex.clamp(0, _pages.length - 1).toInt();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -109,8 +103,8 @@ class _PaySaveBottomNavBar extends StatelessWidget {
               onTap: () => onTap(0),
             ),
             _BottomNavItem(
-              icon: Icons.pie_chart_rounded,
-              label: 'Planner',
+              icon: Icons.add_circle_rounded,
+              label: 'Add',
               isSelected: currentIndex == 1,
               onTap: () => onTap(1),
             ),
@@ -191,92 +185,6 @@ class _BottomNavItem extends StatelessWidget {
 class _DashboardView extends StatelessWidget {
   const _DashboardView();
 
-  @override
-  Widget build(BuildContext context) {
-    final planProvider = context.read<MonthlyPlanProvider>();
-
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: AppColors.softGradient,
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: StreamBuilder<MonthlyPlanModel?>(
-          stream: planProvider.watchCurrentMonthPlan(),
-          builder: (context, snapshot) {
-            final plan = snapshot.data;
-
-            return CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 110),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _HomeHeader(
-                          monthText: DateHelper.formatMonthYear(DateTime.now()),
-                        ),
-                        const SizedBox(height: 24),
-                        if (plan == null)
-                          _NoPlanCard(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.monthlyPlanSetup,
-                              );
-                            },
-                          )
-                        else ...[
-                          BalanceCard(
-                            remainingBalance: plan.remainingBalance,
-                            dailySafeSpending: plan.dailySafeSpending,
-                            isOverBudget: plan.isOverBudget,
-                          ),
-                          const SizedBox(height: 18),
-                          MoneySummaryGrid(
-                            income: plan.monthlyIncome,
-                            rent: plan.rentAmount,
-                            bills: plan.billsBudget,
-                            savings: plan.savingTarget,
-                          ),
-                        ],
-                        const SizedBox(height: 26),
-                        const _SectionTitle(
-                          title: 'Quick Actions',
-                          subtitle: 'Add records and reminders',
-                        ),
-                        const SizedBox(height: 14),
-                        const _QuickActions(),
-                        const SizedBox(height: 28),
-                        const _SectionTitle(
-                          title: 'Upcoming Reminders',
-                          subtitle: 'Bills and installment payment dates',
-                        ),
-                        const SizedBox(height: 14),
-                        const _UpcomingReminders(),
-                        const SizedBox(height: 28),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeHeader extends StatelessWidget {
-  final String monthText;
-
-  const _HomeHeader({
-    required this.monthText,
-  });
-
   String _getUserName(User? user) {
     final displayName = user?.displayName?.trim();
 
@@ -295,163 +203,272 @@ class _HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      initialData: FirebaseAuth.instance.currentUser,
-      builder: (context, snapshot) {
-        final userName = _getUserName(snapshot.data);
+    final provider = context.read<MoneyRecordProvider>();
+    final user = FirebaseAuth.instance.currentUser;
+    final userName = _getUserName(user);
 
-        return Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Hi, $userName 👋',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: AppColors.softGradient,
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: StreamBuilder<List<MoneyRecordModel>>(
+          stream: provider.watchCurrentMonthRecords(),
+          builder: (context, snapshot) {
+            final records = snapshot.data ?? [];
+            final summary = provider.summaryFromRecords(records);
+            final reminders = provider.upcomingReminders(records);
+
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 135),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _Header(userName: userName),
+                        const SizedBox(height: 24),
+
+                        BalanceCard(
+                          remainingBalance: summary.remainingBalance,
+                          dailySafeSpending: summary.dailySafeSpending,
+                          isOverBudget: summary.isOverBudget,
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        _MoneyRecordSummaryGrid(summary: summary),
+
+                        const SizedBox(height: 26),
+
+                        const _SectionTitle(
+                          title: 'Quick Actions',
+                          subtitle: 'Add salary, bills, expenses, and Koko payments',
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        const _QuickActions(),
+
+                        const SizedBox(height: 28),
+
+                        const _SectionTitle(
+                          title: 'Upcoming Reminders',
+                          subtitle: 'Bill and installment payment dates',
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        if (reminders.isEmpty)
+                          const _NoReminderView()
+                        else
+                          Column(
+                            children: reminders.map((record) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: UpcomingPaymentCard(
+                                  title: record.title,
+                                  amount: CurrencyHelper.format(record.amount),
+                                  dueText: DateHelper.dueText(record.date),
+                                  statusText: record.displayType,
+                                  icon: record.isInstallment
+                                      ? Icons.calendar_month_rounded
+                                      : Icons.receipt_long_rounded,
+                                  color: record.isInstallment
+                                      ? AppColors.primary
+                                      : AppColors.warning,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    'Monthly Overview',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.8,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white),
-                    ),
-                    child: Text(
-                      monthText,
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppColors.border),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.notifications_none_rounded,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
-        );
-      },
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 }
 
-class _NoPlanCard extends StatelessWidget {
-  final VoidCallback onPressed;
+class _Header extends StatelessWidget {
+  final String userName;
 
-  const _NoPlanCard({
-    required this.onPressed,
+  const _Header({
+    required this.userName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hi, $userName 👋',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 5),
+              const Text(
+                'Money Overview',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                DateHelper.formatMonthYear(DateTime.now()),
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: const Icon(
+            Icons.notifications_none_rounded,
+            color: AppColors.primary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MoneyRecordSummaryGrid extends StatelessWidget {
+  final MoneySummary summary;
+
+  const _MoneyRecordSummaryGrid({
+    required this.summary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      padding: EdgeInsets.zero,
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 14,
+      mainAxisSpacing: 14,
+      childAspectRatio: 1.55,
+      children: [
+        _SummaryBox(
+          title: 'Income',
+          amount: summary.income,
+          icon: Icons.arrow_downward_rounded,
+          color: AppColors.success,
+        ),
+        _SummaryBox(
+          title: 'Bills',
+          amount: summary.bills,
+          icon: Icons.receipt_long_rounded,
+          color: AppColors.warning,
+        ),
+        _SummaryBox(
+          title: 'Expenses',
+          amount: summary.expenses,
+          icon: Icons.shopping_bag_rounded,
+          color: AppColors.danger,
+        ),
+        _SummaryBox(
+          title: 'Koko / Installments',
+          amount: summary.installments,
+          icon: Icons.calendar_month_rounded,
+          color: AppColors.primary,
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryBox extends StatelessWidget {
+  final String title;
+  final double amount;
+  final IconData icon;
+  final Color color;
+
+  const _SummaryBox({
+    required this.title,
+    required this.amount,
+    required this.icon,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSizes.paddingL),
+      padding: const EdgeInsets.all(AppSizes.paddingM),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.08),
-            blurRadius: 26,
-            offset: const Offset(0, 16),
-          ),
-        ],
       ),
-      child: Column(
+      child: Row(
         children: [
           Container(
-            height: 76,
-            width: 76,
+            height: 44,
+            width: 44,
             decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(26),
+              color: color.withValues(alpha: 0.13),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.pie_chart_rounded,
-              color: Colors.white,
-              size: 38,
-            ),
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            'Create your monthly plan',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
+            child: Icon(
+              icon,
+              color: color,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Set income, rent, bills, savings, and spending limits before you spend.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              height: 1.45,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton.icon(
-              onPressed: onPressed,
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Create Monthly Plan',
-                style: TextStyle(fontWeight: FontWeight.w900),
-              ),
+                const SizedBox(height: 5),
+                Text(
+                  CurrencyHelper.format(amount),
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -462,6 +479,14 @@ class _NoPlanCard extends StatelessWidget {
 
 class _QuickActions extends StatelessWidget {
   const _QuickActions();
+
+  void _openAdd(BuildContext context, String type) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.addMoneyRecord,
+      arguments: type,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -475,121 +500,80 @@ class _QuickActions extends StatelessWidget {
       childAspectRatio: 1.45,
       children: [
         QuickActionCard(
+          title: 'Add Salary',
+          subtitle: 'Monthly income',
+          icon: Icons.payments_rounded,
+          color: AppColors.success,
+          onTap: () => _openAdd(context, MoneyRecordModel.typeSalary),
+        ),
+        QuickActionCard(
           title: 'Add Bill',
-          subtitle: 'Payment reminder',
+          subtitle: 'WiFi, GPT, phone',
           icon: Icons.receipt_long_rounded,
           color: AppColors.warning,
-          onTap: () {
-            Navigator.pushNamed(context, AppRoutes.addBill);
-          },
+          onTap: () => _openAdd(context, MoneyRecordModel.typeBill),
         ),
         QuickActionCard(
           title: 'Add Expense',
-          subtitle: 'Track spending',
-          icon: Icons.trending_down_rounded,
+          subtitle: 'Food, transport',
+          icon: Icons.shopping_bag_rounded,
           color: AppColors.danger,
-          onTap: () {
-            Navigator.pushNamed(context, AppRoutes.addExpense);
-          },
+          onTap: () => _openAdd(context, MoneyRecordModel.typeExpense),
         ),
         QuickActionCard(
-          title: 'Add Goal',
-          subtitle: 'Save better',
-          icon: Icons.savings_rounded,
-          color: AppColors.success,
-          onTap: () {
-            Navigator.pushNamed(context, AppRoutes.addSavingGoal);
-          },
-        ),
-        QuickActionCard(
-          title: 'Installment',
-          subtitle: 'Koko-like reminders',
+          title: 'Koko Payment',
+          subtitle: '3 or 6 months',
           icon: Icons.calendar_month_rounded,
           color: AppColors.primary,
-          onTap: () {
-            Navigator.pushNamed(context, AppRoutes.addInstallment);
-          },
+          onTap: () => _openAdd(context, MoneyRecordModel.typeInstallment),
         ),
       ],
     );
   }
 }
 
-class _UpcomingReminders extends StatelessWidget {
-  const _UpcomingReminders();
+class _NoReminderView extends StatelessWidget {
+  const _NoReminderView();
 
   @override
   Widget build(BuildContext context) {
-    final billProvider = context.read<BillProvider>();
-    final installmentProvider = context.read<InstallmentProvider>();
-
-    return StreamBuilder<List<BillModel>>(
-      stream: billProvider.watchUpcomingBills(),
-      builder: (context, billSnapshot) {
-        final bills = billSnapshot.data ?? [];
-
-        return StreamBuilder<List<InstallmentModel>>(
-          stream: installmentProvider.watchActiveInstallments(),
-          builder: (context, installmentSnapshot) {
-            final installments = installmentSnapshot.data ?? [];
-            final reminderWidgets = <Widget>[];
-
-            for (final bill in bills.take(3)) {
-              reminderWidgets.add(
-                UpcomingPaymentCard(
-                  title: bill.billName,
-                  amount: CurrencyHelper.format(bill.amount),
-                  dueText: DateHelper.dueText(bill.dueDate),
-                  statusText: bill.isPaid ? 'Paid' : 'Unpaid',
-                  icon: Icons.receipt_long_rounded,
-                  color: bill.isOverdue ? AppColors.danger : AppColors.warning,
-                ),
-              );
-            }
-
-            for (final installment in installments.take(2)) {
-              final nextPayment = installment.nextPayment;
-
-              if (nextPayment != null) {
-                reminderWidgets.add(
-                  UpcomingPaymentCard(
-                    title: '${installment.purchaseName} Installment',
-                    amount: CurrencyHelper.format(nextPayment.amount),
-                    dueText: DateHelper.formatShortDate(nextPayment.dueDate),
-                    statusText:
-                        '${installment.paidInstallments} of ${installment.installmentCount} paid',
-                    icon: Icons.calendar_month_rounded,
-                    color: AppColors.primary,
-                  ),
-                );
-              }
-            }
-
-            if (reminderWidgets.isEmpty) {
-              return EmptyState(
-                icon: Icons.notifications_none_rounded,
-                title: 'No upcoming reminders',
-                message: 'Add bills or installment reminders to see them here.',
-                buttonText: 'Add Bill',
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.addBill);
-                },
-              );
-            }
-
-            return Column(
-              children: reminderWidgets
-                  .map(
-                    (widget) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: widget,
-                    ),
-                  )
-                  .toList(),
-            );
-          },
-        );
-      },
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(18, 34, 18, 34),
+      decoration: BoxDecoration(
+        color: AppColors.card.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: const Column(
+        children: [
+          Icon(
+            Icons.notifications_none_rounded,
+            color: AppColors.primary,
+            size: 36,
+          ),
+          SizedBox(height: 14),
+          Text(
+            'No upcoming reminders',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Add bills or Koko payments to see reminders here.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
