@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
+import '../../core/helpers/currency_helper.dart';
 import '../../data/models/money_record_model.dart';
 import '../../providers/money_record_provider.dart';
 
@@ -39,7 +41,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
 
     final args = ModalRoute.of(context)?.settings.arguments;
 
-    if (widget.initialType != null) {
+    if (widget.initialType != null && widget.initialType!.isNotEmpty) {
       _type = widget.initialType!;
     } else if (args is String && args.isNotEmpty) {
       _type = args;
@@ -62,6 +64,8 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
     switch (type) {
       case MoneyRecordModel.typeSalary:
         return 'Salary';
+      case MoneyRecordModel.typeIncome:
+        return 'Income';
       case MoneyRecordModel.typeBill:
         return 'Bill';
       case MoneyRecordModel.typeExpense:
@@ -79,6 +83,8 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
     switch (_type) {
       case MoneyRecordModel.typeSalary:
         return 'Add Salary';
+      case MoneyRecordModel.typeIncome:
+        return 'Add Income';
       case MoneyRecordModel.typeBill:
         return 'Add Bill';
       case MoneyRecordModel.typeExpense:
@@ -86,9 +92,65 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
       case MoneyRecordModel.typeSaving:
         return 'Add Saving';
       case MoneyRecordModel.typeInstallment:
-        return 'Add Koko / Installment';
+        return 'Add Koko Payment';
       default:
         return 'Add Record';
+    }
+  }
+
+  String _screenSubtitle() {
+    switch (_type) {
+      case MoneyRecordModel.typeSalary:
+        return 'Add your monthly salary or main income.';
+      case MoneyRecordModel.typeIncome:
+        return 'Add extra income or one-time money received.';
+      case MoneyRecordModel.typeBill:
+        return 'Add WiFi, GPT, electricity, phone, or other bills.';
+      case MoneyRecordModel.typeExpense:
+        return 'Add food, transport, shopping, or daily expenses.';
+      case MoneyRecordModel.typeSaving:
+        return 'Add money you want to save.';
+      case MoneyRecordModel.typeInstallment:
+        return 'Add Koko-style 3 month or 6 month payment plans.';
+      default:
+        return 'Add your money record details.';
+    }
+  }
+
+  IconData _screenIcon() {
+    switch (_type) {
+      case MoneyRecordModel.typeSalary:
+        return Icons.payments_rounded;
+      case MoneyRecordModel.typeIncome:
+        return Icons.trending_up_rounded;
+      case MoneyRecordModel.typeBill:
+        return Icons.receipt_long_rounded;
+      case MoneyRecordModel.typeExpense:
+        return Icons.shopping_bag_rounded;
+      case MoneyRecordModel.typeSaving:
+        return Icons.savings_rounded;
+      case MoneyRecordModel.typeInstallment:
+        return Icons.calendar_month_rounded;
+      default:
+        return Icons.add_card_rounded;
+    }
+  }
+
+  Color _screenColor() {
+    switch (_type) {
+      case MoneyRecordModel.typeSalary:
+      case MoneyRecordModel.typeIncome:
+        return AppColors.success;
+      case MoneyRecordModel.typeBill:
+        return AppColors.warning;
+      case MoneyRecordModel.typeExpense:
+        return AppColors.danger;
+      case MoneyRecordModel.typeSaving:
+        return AppColors.savings;
+      case MoneyRecordModel.typeInstallment:
+        return AppColors.primary;
+      default:
+        return AppColors.primary;
     }
   }
 
@@ -101,7 +163,8 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
   }
 
   String _dateLabel() {
-    if (_type == MoneyRecordModel.typeSalary) {
+    if (_type == MoneyRecordModel.typeSalary ||
+        _type == MoneyRecordModel.typeIncome) {
       return 'Received date';
     }
 
@@ -121,6 +184,23 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
     return double.tryParse(clean) ?? 0;
   }
 
+  String _formatDate(DateTime date) {
+    final year = date.year.toString();
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+
+    return '$year-$month-$day';
+  }
+
+  double get _amountPreview {
+    return _parseAmount(_amountController.text);
+  }
+
+  double get _monthlyInstallmentPreview {
+    if (_installmentMonths <= 0) return 0;
+    return _amountPreview / _installmentMonths;
+  }
+
   Future<void> _pickDate() async {
     final result = await showDatePicker(
       context: context,
@@ -136,6 +216,24 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
     });
   }
 
+  void _changeType(String type) {
+    setState(() {
+      _type = type;
+      _categoryController.text = _defaultCategory(type);
+    });
+  }
+
+  void _goHomeAfterSave() {
+    if (!mounted) return;
+
+    FocusScope.of(context).unfocus();
+
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.home,
+      (route) => false,
+    );
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -143,7 +241,9 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
 
     final title = _titleController.text.trim();
     final amount = _parseAmount(_amountController.text);
-    final category = _categoryController.text.trim();
+    final category = _categoryController.text.trim().isEmpty
+        ? _defaultCategory(_type)
+        : _categoryController.text.trim();
     final note = _noteController.text.trim();
 
     bool success;
@@ -164,14 +264,15 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
         category: category,
         date: _selectedDate,
         note: note,
-        isPaid: _type == MoneyRecordModel.typeSalary,
+        isPaid: _type == MoneyRecordModel.typeSalary ||
+            _type == MoneyRecordModel.typeIncome,
       );
     }
 
     if (!mounted) return;
 
     if (success) {
-      Navigator.pop(context);
+      _goHomeAfterSave();
       return;
     }
 
@@ -189,91 +290,66 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(_screenTitle()),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: AppColors.softGradient,
         ),
         child: SafeArea(
+          bottom: false,
           child: Form(
             key: _formKey,
             child: ListView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(22, 18, 22, 140),
               children: [
-                const Text(
-                  'Record Details',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                  ),
+                _PageHeader(
+                  title: _screenTitle(),
+                  subtitle: _screenSubtitle(),
+                  icon: _screenIcon(),
+                  color: _screenColor(),
+                  showBack: Navigator.of(context).canPop(),
                 ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Add salary, bills, expenses, savings, or Koko-style installment payments.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    height: 1.4,
-                  ),
-                ),
+
                 const SizedBox(height: 22),
+
+                _HeroRecordCard(
+                  title: _screenTitle(),
+                  subtitle: _screenSubtitle(),
+                  icon: _screenIcon(),
+                  color: _screenColor(),
+                ),
+
+                const SizedBox(height: 22),
+
+                const _SectionTitle(
+                  title: 'Record Type',
+                  subtitle: 'Choose what kind of money record this is.',
+                ),
+
+                const SizedBox(height: 12),
+
+                _TypeGrid(
+                  selectedType: _type,
+                  onChanged: _changeType,
+                ),
+
+                const SizedBox(height: 22),
+
+                const _SectionTitle(
+                  title: 'Details',
+                  subtitle: 'Add amount, reason, category, and date.',
+                ),
+
+                const SizedBox(height: 12),
 
                 _CardBox(
                   child: Column(
                     children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: _type,
-                        decoration: const InputDecoration(
-                          labelText: 'Record type',
-                          prefixIcon: Icon(Icons.category_rounded),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: MoneyRecordModel.typeSalary,
-                            child: Text('Salary / Income'),
-                          ),
-                          DropdownMenuItem(
-                            value: MoneyRecordModel.typeBill,
-                            child: Text('Bill - WiFi / GPT / Electricity'),
-                          ),
-                          DropdownMenuItem(
-                            value: MoneyRecordModel.typeExpense,
-                            child: Text('Expense'),
-                          ),
-                          DropdownMenuItem(
-                            value: MoneyRecordModel.typeSaving,
-                            child: Text('Saving'),
-                          ),
-                          DropdownMenuItem(
-                            value: MoneyRecordModel.typeInstallment,
-                            child: Text('Koko / Installment'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value == null) return;
-
-                          setState(() {
-                            _type = value;
-                            _categoryController.text =
-                                _defaultCategory(value);
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 14),
-
                       TextFormField(
                         controller: _titleController,
                         decoration: InputDecoration(
-                          labelText: isInstallment
-                              ? 'Purchase name'
-                              : 'Reason / name',
+                          labelText:
+                              isInstallment ? 'Purchase name' : 'Reason / name',
                           hintText: isInstallment
                               ? 'Phone / Laptop / Shoes'
                               : 'Salary / WiFi bill / GPT bill',
@@ -287,6 +363,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 14),
 
                       TextFormField(
@@ -295,9 +372,11 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                         decoration: InputDecoration(
                           labelText: _amountLabel(),
                           hintText: '5000',
-                          prefixIcon:
-                              const Icon(Icons.payments_rounded),
+                          prefixIcon: const Icon(Icons.payments_rounded),
                         ),
+                        onChanged: (_) {
+                          setState(() {});
+                        },
                         validator: (value) {
                           final amount = _parseAmount(value ?? '');
 
@@ -308,6 +387,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                           return null;
                         },
                       ),
+
                       const SizedBox(height: 14),
 
                       TextFormField(
@@ -318,6 +398,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                           prefixIcon: Icon(Icons.label_rounded),
                         ),
                       ),
+
                       const SizedBox(height: 14),
 
                       InkWell(
@@ -330,7 +411,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                                 const Icon(Icons.calendar_month_rounded),
                           ),
                           child: Text(
-                            '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
+                            _formatDate(_selectedDate),
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w800,
@@ -341,6 +422,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
 
                       if (isInstallment) ...[
                         const SizedBox(height: 18),
+
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -351,7 +433,9 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                             ),
                           ),
                         ),
+
                         const SizedBox(height: 10),
+
                         Row(
                           children: [
                             Expanded(
@@ -379,14 +463,13 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'PaySave will automatically create $_installmentMonths monthly payments.',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+
+                        const SizedBox(height: 14),
+
+                        _InstallmentPreview(
+                          months: _installmentMonths,
+                          totalAmount: _amountPreview,
+                          monthlyAmount: _monthlyInstallmentPreview,
                         ),
                       ],
 
@@ -430,6 +513,386 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PageHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final bool showBack;
+
+  const _PageHeader({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.showBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (showBack) ...[
+          Material(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                height: 46,
+                width: 46,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+        ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'PaySave',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.13),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: color.withValues(alpha: 0.20)),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroRecordCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+
+  const _HeroRecordCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSizes.paddingL),
+      decoration: BoxDecoration(
+        gradient: AppColors.cardPurpleGradient,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.22),
+            blurRadius: 30,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 62,
+            width: 62,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    height: 1.35,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TypeGrid extends StatelessWidget {
+  final String selectedType;
+  final ValueChanged<String> onChanged;
+
+  const _TypeGrid({
+    required this.selectedType,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      _TypeItem(
+        type: MoneyRecordModel.typeSalary,
+        title: 'Salary',
+        icon: Icons.payments_rounded,
+        color: AppColors.success,
+      ),
+      _TypeItem(
+        type: MoneyRecordModel.typeBill,
+        title: 'Bill',
+        icon: Icons.receipt_long_rounded,
+        color: AppColors.warning,
+      ),
+      _TypeItem(
+        type: MoneyRecordModel.typeExpense,
+        title: 'Expense',
+        icon: Icons.shopping_bag_rounded,
+        color: AppColors.danger,
+      ),
+      _TypeItem(
+        type: MoneyRecordModel.typeInstallment,
+        title: 'Koko',
+        icon: Icons.calendar_month_rounded,
+        color: AppColors.primary,
+      ),
+      _TypeItem(
+        type: MoneyRecordModel.typeSaving,
+        title: 'Saving',
+        icon: Icons.savings_rounded,
+        color: AppColors.savings,
+      ),
+      _TypeItem(
+        type: MoneyRecordModel.typeIncome,
+        title: 'Income',
+        icon: Icons.trending_up_rounded,
+        color: AppColors.info,
+      ),
+    ];
+
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.05,
+      ),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        final selected = selectedType == item.type;
+
+        return _TypeButton(
+          item: item,
+          selected: selected,
+          onTap: () => onChanged(item.type),
+        );
+      },
+    );
+  }
+}
+
+class _TypeItem {
+  final String type;
+  final String title;
+  final IconData icon;
+  final Color color;
+
+  const _TypeItem({
+    required this.type,
+    required this.title,
+    required this.icon,
+    required this.color,
+  });
+}
+
+class _TypeButton extends StatelessWidget {
+  final _TypeItem item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _TypeButton({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: selected ? item.color : AppColors.card,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: selected ? item.color : AppColors.border,
+            ),
+            boxShadow: [
+              if (selected)
+                BoxShadow(
+                  color: item.color.withValues(alpha: 0.22),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                item.icon,
+                color: selected ? Colors.white : item.color,
+                size: 25,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                item.title,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: selected ? Colors.white : AppColors.textPrimary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InstallmentPreview extends StatelessWidget {
+  final int months;
+  final double totalAmount;
+  final double monthlyAmount;
+
+  const _InstallmentPreview({
+    required this.months,
+    required this.totalAmount,
+    required this.monthlyAmount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.softLavender.withValues(alpha: 0.60),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 42,
+            width: 42,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.13),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Icon(
+              Icons.calculate_rounded,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              totalAmount <= 0
+                  ? 'PaySave will create $months monthly payments.'
+                  : '${CurrencyHelper.format(totalAmount)} ÷ $months months = ${CurrencyHelper.format(monthlyAmount)} per month',
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                height: 1.35,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -479,10 +942,8 @@ class _MonthButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        backgroundColor:
-            selected ? AppColors.primary : Colors.transparent,
-        foregroundColor:
-            selected ? Colors.white : AppColors.primary,
+        backgroundColor: selected ? AppColors.primary : Colors.transparent,
+        foregroundColor: selected ? Colors.white : AppColors.primary,
         side: const BorderSide(color: AppColors.primary),
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),
@@ -492,6 +953,43 @@ class _MonthButton extends StatelessWidget {
           fontWeight: FontWeight.w900,
         ),
       ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _SectionTitle({
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 19,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.3,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

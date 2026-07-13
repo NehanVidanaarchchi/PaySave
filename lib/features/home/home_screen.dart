@@ -78,53 +78,123 @@ class _PaySaveBottomNavBar extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        height: 78,
-        margin: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              blurRadius: 30,
-              offset: const Offset(0, 16),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        height: 96,
+        margin: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
           children: [
-            _BottomNavItem(
-              icon: Icons.home_rounded,
-              label: 'Home',
-              isSelected: currentIndex == 0,
-              onTap: () => onTap(0),
+            Container(
+              height: 76,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: AppColors.card.withValues(alpha: 0.96),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: AppColors.border.withValues(alpha: 0.95),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.16),
+                    blurRadius: 32,
+                    offset: const Offset(0, 18),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _BottomNavItem(
+                      icon: Icons.home_rounded,
+                      label: 'Home',
+                      isSelected: currentIndex == 0,
+                      onTap: () => onTap(0),
+                    ),
+                  ),
+                  Expanded(
+                    child: _BottomNavItem(
+                      icon: Icons.receipt_long_rounded,
+                      label: 'Bills',
+                      isSelected: currentIndex == 2,
+                      onTap: () => onTap(2),
+                    ),
+                  ),
+                  const SizedBox(width: 74),
+                  Expanded(
+                    child: _BottomNavItem(
+                      icon: Icons.savings_rounded,
+                      label: 'Savings',
+                      isSelected: currentIndex == 3,
+                      onTap: () => onTap(3),
+                    ),
+                  ),
+                  Expanded(
+                    child: _BottomNavItem(
+                      icon: Icons.settings_rounded,
+                      label: 'Settings',
+                      isSelected: currentIndex == 4,
+                      onTap: () => onTap(4),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            _BottomNavItem(
-              icon: Icons.add_circle_rounded,
-              label: 'Add',
-              isSelected: currentIndex == 1,
-              onTap: () => onTap(1),
+            Positioned(
+              top: 0,
+              child: GestureDetector(
+                onTap: () => onTap(1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  height: 74,
+                  width: 74,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: AppColors.primaryGradient,
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.32),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.42),
+                        blurRadius: 28,
+                        offset: const Offset(0, 14),
+                      ),
+                    ],
+                  ),
+                  child: AnimatedScale(
+                    scale: currentIndex == 1 ? 1.08 : 1.0,
+                    duration: const Duration(milliseconds: 180),
+                    child: const Icon(
+                      Icons.add_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
+                  ),
+                ),
+              ),
             ),
-            _BottomNavItem(
-              icon: Icons.receipt_long_rounded,
-              label: 'Bills',
-              isSelected: currentIndex == 2,
-              onTap: () => onTap(2),
-            ),
-            _BottomNavItem(
-              icon: Icons.savings_rounded,
-              label: 'Savings',
-              isSelected: currentIndex == 3,
-              onTap: () => onTap(3),
-            ),
-            _BottomNavItem(
-              icon: Icons.settings_rounded,
-              label: 'Settings',
-              isSelected: currentIndex == 4,
-              onTap: () => onTap(4),
+            Positioned(
+              bottom: 7,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 180),
+                opacity: currentIndex == 1 ? 1 : 0.75,
+                child: Text(
+                  'Add',
+                  style: TextStyle(
+                    color: currentIndex == 1
+                        ? AppColors.primary
+                        : AppColors.textLight,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -148,34 +218,54 @@ class _BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.softLavender : Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: isSelected ? AppColors.primary : AppColors.textLight,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          height: 58,
+          margin: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.20)
+                  : Colors.transparent,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: isSelected ? AppColors.primary : AppColors.textLight,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: isSelected ? 1.12 : 1.0,
+                duration: const Duration(milliseconds: 180),
+                child: Icon(
+                  icon,
+                  size: 23,
+                  color: isSelected ? AppColors.primary : AppColors.textLight,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 5),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                  color: isSelected ? AppColors.primary : AppColors.textLight,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -225,43 +315,33 @@ class _DashboardView extends StatelessWidget {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 135),
+                    padding: const EdgeInsets.fromLTRB(22, 18, 22, 150),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _Header(userName: userName),
                         const SizedBox(height: 24),
-
                         BalanceCard(
                           remainingBalance: summary.remainingBalance,
                           dailySafeSpending: summary.dailySafeSpending,
                           isOverBudget: summary.isOverBudget,
                         ),
-
                         const SizedBox(height: 18),
-
                         _MoneyRecordSummaryGrid(summary: summary),
-
                         const SizedBox(height: 26),
-
                         const _SectionTitle(
                           title: 'Quick Actions',
-                          subtitle: 'Add salary, bills, expenses, and Koko payments',
+                          subtitle:
+                              'Add salary, bills, expenses, and Koko payments',
                         ),
-
                         const SizedBox(height: 14),
-
                         const _QuickActions(),
-
                         const SizedBox(height: 28),
-
                         const _SectionTitle(
                           title: 'Upcoming Reminders',
                           subtitle: 'Bill and installment payment dates',
                         ),
-
                         const SizedBox(height: 14),
-
                         if (reminders.isEmpty)
                           const _NoReminderView()
                         else
