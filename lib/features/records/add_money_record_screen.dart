@@ -201,6 +201,75 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
     return _amountPreview / _installmentMonths;
   }
 
+  TextStyle get _fieldTextStyle {
+    return const TextStyle(
+      color: AppColors.textPrimary,
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
+    );
+  }
+
+  InputDecoration _fieldDecoration({
+    required String labelText,
+    required String hintText,
+    required IconData icon,
+  }) {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      labelText: labelText,
+      hintText: hintText,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      labelStyle: const TextStyle(
+        color: AppColors.primary,
+        fontSize: 13,
+        fontWeight: FontWeight.w900,
+      ),
+      hintStyle: const TextStyle(
+        color: AppColors.textLight,
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+      ),
+      prefixIcon: Icon(
+        icon,
+        color: AppColors.primary,
+        size: 22,
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 18,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(
+          color: AppColors.border,
+          width: 1.4,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(
+          color: AppColors.primary,
+          width: 1.8,
+        ),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(
+          color: AppColors.danger,
+          width: 1.4,
+        ),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(
+          color: AppColors.danger,
+          width: 1.8,
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickDate() async {
     final result = await showDatePicker(
       context: context,
@@ -300,7 +369,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
             key: _formKey,
             child: ListView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(22, 18, 22, 140),
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 150),
               children: [
                 _PageHeader(
                   title: _screenTitle(),
@@ -309,70 +378,60 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                   color: _screenColor(),
                   showBack: Navigator.of(context).canPop(),
                 ),
-
                 const SizedBox(height: 22),
-
                 _HeroRecordCard(
                   title: _screenTitle(),
                   subtitle: _screenSubtitle(),
                   icon: _screenIcon(),
-                  color: _screenColor(),
                 ),
-
                 const SizedBox(height: 22),
-
                 const _SectionTitle(
                   title: 'Record Type',
                   subtitle: 'Choose what kind of money record this is.',
                 ),
-
                 const SizedBox(height: 12),
-
                 _TypeGrid(
                   selectedType: _type,
                   onChanged: _changeType,
                 ),
-
                 const SizedBox(height: 22),
-
                 const _SectionTitle(
                   title: 'Details',
                   subtitle: 'Add amount, reason, category, and date.',
                 ),
-
                 const SizedBox(height: 12),
-
                 _CardBox(
                   child: Column(
                     children: [
                       TextFormField(
                         controller: _titleController,
-                        decoration: InputDecoration(
+                        style: _fieldTextStyle,
+                        cursorColor: AppColors.primary,
+                        decoration: _fieldDecoration(
                           labelText:
                               isInstallment ? 'Purchase name' : 'Reason / name',
                           hintText: isInstallment
                               ? 'Phone / Laptop / Shoes'
                               : 'Salary / WiFi bill / GPT bill',
-                          prefixIcon: const Icon(Icons.edit_note_rounded),
+                          icon: Icons.edit_note_rounded,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Please enter a reason';
                           }
-
                           return null;
                         },
                       ),
-
                       const SizedBox(height: 14),
-
                       TextFormField(
                         controller: _amountController,
+                        style: _fieldTextStyle,
+                        cursorColor: AppColors.primary,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
+                        decoration: _fieldDecoration(
                           labelText: _amountLabel(),
                           hintText: '5000',
-                          prefixIcon: const Icon(Icons.payments_rounded),
+                          icon: Icons.payments_rounded,
                         ),
                         onChanged: (_) {
                           setState(() {});
@@ -383,59 +442,50 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                           if (amount <= 0) {
                             return 'Please enter a valid amount';
                           }
-
                           return null;
                         },
                       ),
-
                       const SizedBox(height: 14),
-
                       TextFormField(
                         controller: _categoryController,
-                        decoration: const InputDecoration(
+                        style: _fieldTextStyle,
+                        cursorColor: AppColors.primary,
+                        decoration: _fieldDecoration(
                           labelText: 'Category',
                           hintText: 'WiFi / GPT / Food / Salary',
-                          prefixIcon: Icon(Icons.label_rounded),
+                          icon: Icons.label_rounded,
                         ),
                       ),
-
                       const SizedBox(height: 14),
-
                       InkWell(
                         borderRadius: BorderRadius.circular(18),
                         onTap: _pickDate,
                         child: InputDecorator(
-                          decoration: InputDecoration(
+                          decoration: _fieldDecoration(
                             labelText: _dateLabel(),
-                            prefixIcon:
-                                const Icon(Icons.calendar_month_rounded),
+                            hintText: 'Select date',
+                            icon: Icons.calendar_month_rounded,
                           ),
                           child: Text(
                             _formatDate(_selectedDate),
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: _fieldTextStyle,
                           ),
                         ),
                       ),
-
                       if (isInstallment) ...[
                         const SizedBox(height: 18),
-
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             'Installment months',
                             style: TextStyle(
                               color: AppColors.textPrimary,
+                              fontSize: 14,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 10),
-
                         Row(
                           children: [
                             Expanded(
@@ -463,33 +513,29 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 14),
-
                         _InstallmentPreview(
                           months: _installmentMonths,
                           totalAmount: _amountPreview,
                           monthlyAmount: _monthlyInstallmentPreview,
                         ),
                       ],
-
                       const SizedBox(height: 14),
-
                       TextFormField(
                         controller: _noteController,
+                        style: _fieldTextStyle,
+                        cursorColor: AppColors.primary,
                         maxLines: 3,
-                        decoration: const InputDecoration(
+                        decoration: _fieldDecoration(
                           labelText: 'Note',
                           hintText: 'Optional note',
-                          prefixIcon: Icon(Icons.notes_rounded),
+                          icon: Icons.notes_rounded,
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 22),
-
                 SizedBox(
                   height: 56,
                   child: ElevatedButton.icon(
@@ -539,7 +585,7 @@ class _PageHeader extends StatelessWidget {
       children: [
         if (showBack) ...[
           Material(
-            color: AppColors.card,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
@@ -588,7 +634,7 @@ class _PageHeader extends StatelessWidget {
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   height: 1.3,
                 ),
               ),
@@ -617,13 +663,11 @@ class _HeroRecordCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-  final Color color;
 
   const _HeroRecordCard({
     required this.title,
     required this.subtitle,
     required this.icon,
-    required this.color,
   });
 
   @override
@@ -803,10 +847,11 @@ class _TypeButton extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: selected ? item.color : AppColors.card,
+            color: selected ? item.color : Colors.white,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: selected ? item.color : AppColors.border,
+              width: 1.2,
             ),
             boxShadow: [
               if (selected)
@@ -885,7 +930,7 @@ class _InstallmentPreview extends StatelessWidget {
                   ? 'PaySave will create $months monthly payments.'
                   : '${CurrencyHelper.format(totalAmount)} ÷ $months months = ${CurrencyHelper.format(monthlyAmount)} per month',
               style: const TextStyle(
-                color: AppColors.textSecondary,
+                color: AppColors.textPrimary,
                 fontSize: 12,
                 height: 1.35,
                 fontWeight: FontWeight.w800,
@@ -910,14 +955,17 @@ class _CardBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingM),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: AppColors.border,
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 12),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -942,9 +990,9 @@ class _MonthButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        backgroundColor: selected ? AppColors.primary : Colors.transparent,
+        backgroundColor: selected ? AppColors.primary : Colors.white,
         foregroundColor: selected ? Colors.white : AppColors.primary,
-        side: const BorderSide(color: AppColors.primary),
+        side: const BorderSide(color: AppColors.primary, width: 1.3),
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),
       child: Text(
@@ -986,7 +1034,7 @@ class _SectionTitle extends StatelessWidget {
           style: const TextStyle(
             color: AppColors.textSecondary,
             fontSize: 12,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
