@@ -337,14 +337,7 @@ class _DashboardView extends StatelessWidget {
                         const SizedBox(height: 14),
                         const _QuickActions(),
                         const SizedBox(height: 28),
-                        const _SectionTitle(
-                          title: 'Upcoming Reminders',
-                          subtitle: 'Bill and installment payment dates',
-                        ),
-                        const SizedBox(height: 14),
-                        if (reminders.isEmpty)
-                          const _NoReminderView()
-                        else
+
                           Column(
                             children: reminders.map((record) {
                               return Padding(
@@ -608,52 +601,6 @@ class _QuickActions extends StatelessWidget {
           onTap: () => _openAdd(context, MoneyRecordModel.typeInstallment),
         ),
       ],
-    );
-  }
-}
-
-class _NoReminderView extends StatelessWidget {
-  const _NoReminderView();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(18, 34, 18, 34),
-      decoration: BoxDecoration(
-        color: AppColors.card.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: const Column(
-        children: [
-          Icon(
-            Icons.notifications_none_rounded,
-            color: AppColors.primary,
-            size: 36,
-          ),
-          SizedBox(height: 14),
-          Text(
-            'No upcoming reminders',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Add bills or Koko payments to see reminders here.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

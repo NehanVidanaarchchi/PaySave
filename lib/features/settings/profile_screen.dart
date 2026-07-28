@@ -26,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _loaded = false;
   String _currency = 'LKR';
-  String _themeMode = 'light';
   int _reminderMinutesBefore = 1440;
 
   @override
@@ -46,7 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _emailController.text = user?.email ?? firebaseUser?.email ?? '';
 
     _currency = user?.currency ?? 'LKR';
-    _themeMode = user?.themeMode ?? 'light';
     _reminderMinutesBefore = user?.reminderMinutesBefore ?? 1440;
 
     _loaded = true;
@@ -72,7 +70,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       email: _emailController.text.trim(),
       photoUrl: firebaseUser.photoURL,
       currency: _currency,
-      themeMode: _themeMode,
       reminderMinutesBefore: _reminderMinutesBefore,
       createdAt: currentUserModel?.createdAt ?? now,
       updatedAt: now,
@@ -191,21 +188,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onChanged: (value) {
                               if (value == null) return;
                               setState(() => _currency = value);
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          _DropdownBox(
-                            label: 'Theme Mode',
-                            value: _themeMode,
-                            items: const ['light', 'dark', 'system'],
-                            labelBuilder: (value) {
-                              if (value == 'light') return 'Light';
-                              if (value == 'dark') return 'Dark';
-                              return 'System';
-                            },
-                            onChanged: (value) {
-                              if (value == null) return;
-                              setState(() => _themeMode = value);
                             },
                           ),
                           const SizedBox(height: 16),

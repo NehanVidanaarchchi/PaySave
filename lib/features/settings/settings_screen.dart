@@ -270,17 +270,6 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 12),
-              _SettingsSwitchTile(
-                icon: Icons.dark_mode_rounded,
-                title: 'Dark Mode',
-                subtitle: 'Switch app theme',
-                color: AppColors.primary,
-                value: themeProvider.isDarkMode,
-                onChanged: (_) {
-                  themeProvider.toggleTheme();
-                },
-              ),
               const SizedBox(height: 22),
               const _SectionTitle(title: 'Data Management'),
               const SizedBox(height: 12),
