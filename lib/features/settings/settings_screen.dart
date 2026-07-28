@@ -199,7 +199,6 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    final themeProvider = context.watch<ThemeProvider>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
