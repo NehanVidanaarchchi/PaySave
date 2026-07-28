@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/firebase_collections.dart';
-import '../../providers/theme_provider.dart';
+
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
