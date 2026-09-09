@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/error/error_handler.dart';
 import '../data/models/expense_model.dart';
 import '../data/repositories/expense_repository.dart';
 
@@ -43,8 +44,9 @@ class ExpenseProvider extends ChangeNotifier {
   Future<ExpenseModel?> getExpenseById(String expenseId) async {
     try {
       return await _repository.getExpenseById(expenseId);
-    } catch (e) {
-      _setError(e.toString());
+    } catch (e, stackTrace) {
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return null;
     }
   }
@@ -80,9 +82,10 @@ class ExpenseProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -98,9 +101,10 @@ class ExpenseProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -114,9 +118,10 @@ class ExpenseProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }

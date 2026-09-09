@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/error/error_handler.dart';
 import '../data/models/money_record_model.dart';
 import '../data/repositories/money_record_repository.dart';
 
@@ -99,9 +100,10 @@ class MoneyRecordProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -146,9 +148,10 @@ class MoneyRecordProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -219,9 +222,10 @@ class MoneyRecordProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -235,9 +239,10 @@ class MoneyRecordProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }

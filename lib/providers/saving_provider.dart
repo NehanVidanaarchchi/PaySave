@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/error/error_handler.dart';
 import '../data/models/saving_goal_model.dart';
 import '../data/repositories/saving_repository.dart';
 
@@ -39,8 +40,9 @@ class SavingProvider extends ChangeNotifier {
   Future<SavingGoalModel?> getSavingGoalById(String goalId) async {
     try {
       return await _repository.getSavingGoalById(goalId);
-    } catch (e) {
-      _setError(e.toString());
+    } catch (e, stackTrace) {
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return null;
     }
   }
@@ -76,9 +78,10 @@ class SavingProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -94,9 +97,10 @@ class SavingProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -113,9 +117,10 @@ class SavingProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -132,9 +137,10 @@ class SavingProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -148,9 +154,10 @@ class SavingProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }

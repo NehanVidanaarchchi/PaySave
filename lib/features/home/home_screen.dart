@@ -5,8 +5,10 @@ import 'package:provider/provider.dart';
 import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
+import '../../core/error/error_handler.dart';
 import '../../core/helpers/currency_helper.dart';
 import '../../core/helpers/date_helper.dart';
+import '../../core/widgets/error_state.dart';
 import '../../data/models/money_record_model.dart';
 import '../../providers/money_record_provider.dart';
 
@@ -272,8 +274,14 @@ class _BottomNavItem extends StatelessWidget {
   }
 }
 
-class _DashboardView extends StatelessWidget {
+class _DashboardView extends StatefulWidget {
   const _DashboardView();
+
+  @override
+  State<_DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<_DashboardView> {
 
   String _getUserName(User? user) {
     final displayName = user?.displayName?.trim();
@@ -306,6 +314,15 @@ class _DashboardView extends StatelessWidget {
         child: StreamBuilder<List<MoneyRecordModel>>(
           stream: provider.watchCurrentMonthRecords(),
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return ErrorState(
+                message: ErrorHandler.getMessage(snapshot.error),
+                onRetry: () {
+                  setState(() {});
+                },
+              );
+            }
+
             final records = snapshot.data ?? [];
             final summary = provider.summaryFromRecords(records);
             final reminders = provider.upcomingReminders(records);

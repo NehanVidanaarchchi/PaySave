@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/error/error_handler.dart';
 import '../data/repositories/auth_repository.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -38,9 +39,10 @@ class AuthProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -60,9 +62,10 @@ class AuthProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -78,9 +81,10 @@ class AuthProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -93,9 +97,10 @@ class AuthProvider extends ChangeNotifier {
       await _repository.logout();
 
       _setLoading(false);
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
     }
   }
 

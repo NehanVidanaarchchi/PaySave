@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/error/error_handler.dart';
 import '../data/firebase/firebase_user_service.dart';
 import '../data/models/user_model.dart';
 
@@ -28,9 +29,10 @@ class UserProvider extends ChangeNotifier {
       user = await _userService.getCurrentUserProfile();
 
       _setLoading(false);
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
     }
   }
 
@@ -48,9 +50,10 @@ class UserProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -65,8 +68,9 @@ class UserProvider extends ChangeNotifier {
 
       notifyListeners();
       return true;
-    } catch (e) {
-      _setError(e.toString());
+    } catch (e, stackTrace) {
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -81,8 +85,9 @@ class UserProvider extends ChangeNotifier {
 
       notifyListeners();
       return true;
-    } catch (e) {
-      _setError(e.toString());
+    } catch (e, stackTrace) {
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -100,8 +105,9 @@ class UserProvider extends ChangeNotifier {
 
       notifyListeners();
       return true;
-    } catch (e) {
-      _setError(e.toString());
+    } catch (e, stackTrace) {
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }

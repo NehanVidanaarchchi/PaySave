@@ -19,6 +19,7 @@ dependencies:
   firebase_auth: ^6.5.1
   cloud_firestore: ^6.4.1
   firebase_storage: ^13.4.1
+  firebase_crashlytics: ^5.2.2
 
   # State management
   provider: ^6.1.5+1

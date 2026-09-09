@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/error/error_handler.dart';
 import '../data/models/monthly_plan_model.dart';
 import '../data/repositories/monthly_plan_repository.dart';
 
@@ -58,9 +59,10 @@ class MonthlyPlanProvider extends ChangeNotifier {
       currentPlan = await _repository.getPlanByMonth(currentMonthKey);
 
       _setLoading(false);
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
     }
   }
 
@@ -105,9 +107,10 @@ class MonthlyPlanProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }
@@ -125,9 +128,10 @@ class MonthlyPlanProvider extends ChangeNotifier {
 
       _setLoading(false);
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
       _setLoading(false);
-      _setError(e.toString());
+      _setError(ErrorHandler.getMessage(e));
+      ErrorHandler.log(e, stackTrace);
       return false;
     }
   }

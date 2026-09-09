@@ -3,16 +3,23 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/error/error_handler.dart';
 import '../../core/widgets/empty_state.dart';
-import '../../core/widgets/error_view.dart';
+import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../data/models/saving_goal_model.dart';
 import '../../providers/saving_provider.dart';
 import 'widgets/saving_goal_card.dart';
 import 'widgets/saving_progress_card.dart';
 
-class SavingsScreen extends StatelessWidget {
+class SavingsScreen extends StatefulWidget {
   const SavingsScreen({super.key});
+
+  @override
+  State<SavingsScreen> createState() => _SavingsScreenState();
+}
+
+class _SavingsScreenState extends State<SavingsScreen> {
 
   Future<void> _showMoneyDialog({
     required BuildContext context,
@@ -150,7 +157,12 @@ class SavingsScreen extends StatelessWidget {
             stream: provider.watchSavingGoals(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return ErrorView(message: snapshot.error.toString());
+                return ErrorState(
+                  message: ErrorHandler.getMessage(snapshot.error),
+                  onRetry: () {
+                    setState(() {});
+                  },
+                );
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {

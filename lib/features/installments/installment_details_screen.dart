@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/error/error_handler.dart';
+import '../../../core/widgets/error_state.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/helpers/currency_helper.dart';
@@ -10,14 +12,21 @@ import '../../core/widgets/loading_view.dart';
 import '../../data/models/installment_model.dart';
 import '../../providers/installment_provider.dart';
 
-class InstallmentDetailsScreen extends StatelessWidget {
+class InstallmentDetailsScreen extends StatefulWidget {
   final String? installmentId;
 
   const InstallmentDetailsScreen({super.key, required this.installmentId});
 
   @override
+  State<InstallmentDetailsScreen> createState() =>
+      _InstallmentDetailsScreenState();
+}
+
+class _InstallmentDetailsScreenState extends State<InstallmentDetailsScreen> {
+
+  @override
   Widget build(BuildContext context) {
-    if (installmentId == null) {
+    if (widget.installmentId == null) {
       return const Scaffold(
         body: ErrorView(message: 'Installment ID not found'),
       );
@@ -36,7 +45,12 @@ class InstallmentDetailsScreen extends StatelessWidget {
             stream: provider.watchInstallments(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return ErrorView(message: snapshot.error.toString());
+                return ErrorState(
+                  message: ErrorHandler.getMessage(snapshot.error),
+                  onRetry: () {
+                    setState(() {});
+                  },
+                );
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -45,7 +59,7 @@ class InstallmentDetailsScreen extends StatelessWidget {
 
               final installments = snapshot.data ?? [];
               final installment = installments
-                  .where((item) => item.id == installmentId)
+                  .where((item) => item.id == widget.installmentId)
                   .cast<InstallmentModel?>()
                   .firstOrNull;
 

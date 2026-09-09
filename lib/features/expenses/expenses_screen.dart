@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/error/error_handler.dart';
 import '../../core/helpers/currency_helper.dart';
 import '../../core/widgets/empty_state.dart';
-import '../../core/widgets/error_view.dart';
+import '../../core/widgets/error_state.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../data/models/expense_model.dart';
 import '../../providers/expense_provider.dart';
@@ -105,7 +106,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             stream: provider.watchExpenses(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
-                return ErrorView(message: snapshot.error.toString());
+                return ErrorState(
+                  message: ErrorHandler.getMessage(snapshot.error),
+                  onRetry: () {
+                    setState(() {});
+                  },
+                );
               }
 
               if (snapshot.connectionState == ConnectionState.waiting) {
