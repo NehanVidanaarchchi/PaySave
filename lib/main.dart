@@ -29,10 +29,6 @@ Future<void> main() async {
 
 
   // Global Flutter UI error handler
-  FlutterError.onError =
-      FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-
   // Replace Flutter red error screen
   ErrorWidget.builder =
       (FlutterErrorDetails details) {
@@ -54,6 +50,9 @@ Future<void> main() async {
 
     await FirebaseCrashlytics.instance
         .setCrashlyticsCollectionEnabled(true);
+
+    FlutterError.onError =
+      FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   } catch (e, stackTrace) {
 

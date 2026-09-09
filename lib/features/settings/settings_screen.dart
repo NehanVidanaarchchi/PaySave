@@ -6,6 +6,7 @@ import '../../app/app_routes.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_sizes.dart';
 import '../../core/constants/firebase_collections.dart';
+import '../../core/services/account_service.dart';
 
 
 class SettingsScreen extends StatelessWidget {
@@ -123,6 +124,60 @@ class SettingsScreen extends StatelessWidget {
           content: Text('Failed to clean data: $e'),
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Account?'),
+          content: const Text(
+            'This will permanently delete your account and all PaySave data. '
+            'This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await AccountService().deleteAccount();
+
+      if (!context.mounted) return;
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (_) => false,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Delete failed: $e'),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -277,6 +332,16 @@ class SettingsScreen extends StatelessWidget {
                 subtitle: 'Remove records, bills, goals, expenses, and plans',
                 color: AppColors.danger,
                 onTap: () => _cleanUserData(context),
+              ),
+              const SizedBox(height: 12),
+              _SettingsTile(
+                icon: Icons.delete_forever_rounded,
+                title: 'Delete Account',
+                subtitle: 'Permanently remove your PaySave account',
+                color: AppColors.danger,
+                onTap: () {
+                  _deleteAccount(context);
+                },
               ),
               const SizedBox(height: 22),
               const _SectionTitle(title: 'About'),
