@@ -89,21 +89,16 @@ class _PaySaveBottomNavBar extends StatelessWidget {
               height: 76,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: AppColors.card.withValues(alpha: 0.96),
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
                   color: AppColors.border.withValues(alpha: 0.95),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.16),
-                    blurRadius: 32,
-                    offset: const Offset(0, 18),
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+                    color: Colors.black.withValues(alpha: 0.6),
+                    blurRadius: 24,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
@@ -156,16 +151,16 @@ class _PaySaveBottomNavBar extends StatelessWidget {
                   width: 74,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: AppColors.primaryGradient,
+                    color: Colors.white,
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.32),
+                      color: AppColors.border,
                       width: 3,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.42),
-                        blurRadius: 28,
-                        offset: const Offset(0, 14),
+                        color: Colors.black.withValues(alpha: 0.7),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
@@ -174,7 +169,7 @@ class _PaySaveBottomNavBar extends StatelessWidget {
                     duration: const Duration(milliseconds: 180),
                     child: const Icon(
                       Icons.add_rounded,
-                      color: Colors.white,
+                      color: Colors.black,
                       size: 36,
                     ),
                   ),
@@ -190,7 +185,7 @@ class _PaySaveBottomNavBar extends StatelessWidget {
                   'Add',
                   style: TextStyle(
                     color: currentIndex == 1
-                        ? AppColors.primary
+                        ? Colors.white
                         : AppColors.textLight,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
@@ -233,14 +228,10 @@ class _BottomNavItem extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 2),
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.12)
-                : Colors.transparent,
+            color: isSelected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.20)
-                  : Colors.transparent,
+                  color: isSelected ? Colors.white : Colors.transparent,
             ),
           ),
           child: Column(
@@ -252,7 +243,7 @@ class _BottomNavItem extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 23,
-                  color: isSelected ? AppColors.primary : AppColors.textLight,
+                  color: isSelected ? Colors.black : const Color(0xff777777),
                 ),
               ),
               const SizedBox(height: 5),
@@ -263,7 +254,7 @@ class _BottomNavItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 9.5,
                   fontWeight: FontWeight.w900,
-                  color: isSelected ? AppColors.primary : AppColors.textLight,
+                  color: isSelected ? Colors.black : const Color(0xff777777),
                 ),
               ),
             ],
@@ -307,7 +298,7 @@ class _DashboardViewState extends State<_DashboardView> {
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: AppColors.softGradient,
+        color: AppColors.background,
       ),
       child: SafeArea(
         bottom: false,
@@ -442,7 +433,7 @@ class _Header extends StatelessWidget {
           ),
           child: const Icon(
             Icons.notifications_none_rounded,
-            color: AppColors.primary,
+              color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -514,10 +505,11 @@ class _SummaryBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingM),
-      decoration: BoxDecoration(
-        color: AppColors.card,
+        decoration: BoxDecoration(
+          color: AppColors.card,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: AppColors.border),
+          boxShadow: AppColors.cardShadow,
       ),
       child: Row(
         children: [

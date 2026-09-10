@@ -1,48 +1,55 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF6C4DFF);
-  static const Color primaryDark = Color(0xFF17124A);
-  static const Color secondary = Color(0xFF8B7CFF);
+  static const Color white = Colors.white;
+  static const Color black = Colors.black;
+  static const Color background = Color(0xff000000);
+  static const Color card = Color(0xff111111);
+  static const Color cardLight = Color(0xff181818);
+  static const Color textPrimary = Color(0xffffffff);
+  static const Color textSecondary = Color(0xffA1A1A1);
+  static const Color textLight = Color(0xff666666);
+  static const Color border = Color(0xff292929);
+  static const Color primary = Color(0xffffffff);
+  static const Color primaryDark = Color(0xffE5E5E5);
+  static const Color success = Color(0xff22C55E);
+  static const Color danger = Color(0xffEF4444);
+  static const Color warning = Color(0xffF59E0B);
+  static const Color info = Color(0xff60A5FA);
 
-  static const Color background = Color(0xFFF7F6FF);
-  static const Color softLavender = Color(0xFFEDEBFF);
-  static const Color card = Color(0xFFFFFFFF);
-  static const Color border = Color(0xFFE7E5F5);
+  static const Color secondary = textSecondary;
+  static const Color softLavender = cardLight;
+  static const Color rent = danger;
+  static const Color bills = warning;
+  static const Color savings = success;
+  static const Color expenses = info;
+  static const Color darkBackground = background;
+  static const Color darkCard = card;
+  static const Color darkBorder = border;
 
-  static const Color textPrimary = Color(0xFF15152F);
-  static const Color textSecondary = Color(0xFF7C7D91);
-  static const Color textLight = Color(0xFFA7A8BA);
-
-  static const Color success = Color(0xFF26B56E);
-  static const Color warning = Color(0xFFFFB84D);
-  static const Color danger = Color(0xFFFF6B6B);
-  static const Color info = Color(0xFF4BA3FF);
-
-  static const Color rent = Color(0xFFFF6B6B);
-  static const Color bills = Color(0xFFFFB84D);
-  static const Color savings = Color(0xFF26B56E);
-  static const Color expenses = Color(0xFF9B7BFF);
-
-  static const Color darkBackground = Color(0xFF080A12);
-  static const Color darkCard = Color(0xFF111522);
-  static const Color darkBorder = Color(0xFF1D2333);
+  static const List<BoxShadow> cardShadow = [
+    BoxShadow(
+      color: Color(0x66000000),
+      blurRadius: 24,
+      offset: Offset(0, 12),
+    ),
+  ];
 
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF7D5CFF), Color(0xFF5638D8)],
+    colors: [Color(0xff181818), Color(0xff111111)],
   );
 
   static const LinearGradient softGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFF8F7FF), Color(0xFFE9E7FF)],
+    colors: [Color(0xff000000), Color(0xff111111)],
   );
 
   static const LinearGradient cardPurpleGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF7A5CFF), Color(0xFF4A32C9)],
+    colors: [Color(0xff181818), Color(0xff111111)],
   );
 }

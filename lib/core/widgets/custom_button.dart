@@ -29,7 +29,7 @@ class CustomButton extends StatelessWidget {
             height: 22,
             child: CircularProgressIndicator(
               strokeWidth: 2.4,
-              color: Colors.white,
+              color: AppColors.white,
             ),
           )
         : Row(
@@ -70,32 +70,17 @@ class CustomButton extends StatelessWidget {
     return SizedBox(
       height: height,
       width: double.infinity,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(AppSizes.radiusL),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.28),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: ElevatedButton(
+      child: ElevatedButton(
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            backgroundColor: Colors.transparent,
-            disabledBackgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.white,
+            foregroundColor: AppColors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizes.radiusL),
             ),
           ),
           child: child,
-        ),
       ),
     );
   }

@@ -19,7 +19,6 @@ import 'providers/installment_provider.dart';
 import 'providers/money_record_provider.dart';
 import 'providers/monthly_plan_provider.dart';
 import 'providers/saving_provider.dart';
-import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 
 
@@ -99,34 +98,11 @@ Future<void> main() async {
 
 
 
-  // Load saved theme
-  final themeProvider = ThemeProvider();
-
-  try {
-
-    await themeProvider.loadTheme();
-
-  } catch (e, stackTrace) {
-
-    ErrorHandler.log(
-      e,
-      stackTrace,
-    );
-
-  }
-
-
-
   runApp(
 
     MultiProvider(
 
       providers: [
-
-
-        ChangeNotifierProvider<ThemeProvider>.value(
-          value: themeProvider,
-        ),
 
 
         ChangeNotifierProvider<AuthProvider>(

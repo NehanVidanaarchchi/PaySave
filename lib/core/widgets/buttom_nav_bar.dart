@@ -25,7 +25,7 @@ class PaySaveBottomNavBar extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.6),
             blurRadius: 30,
             offset: const Offset(0, 16),
           ),
@@ -92,7 +92,7 @@ class _NavItem extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.softLavender : Colors.transparent,
+          color: isSelected ? AppColors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Column(
@@ -101,7 +101,7 @@ class _NavItem extends StatelessWidget {
             Icon(
               icon,
               size: 22,
-              color: isSelected ? AppColors.primary : AppColors.textLight,
+              color: isSelected ? AppColors.black : const Color(0xff777777),
             ),
             const SizedBox(height: 4),
             Text(
@@ -109,7 +109,7 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
-                color: isSelected ? AppColors.primary : AppColors.textLight,
+                color: isSelected ? AppColors.black : const Color(0xff777777),
               ),
             ),
           ],

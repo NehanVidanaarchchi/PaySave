@@ -26,15 +26,10 @@ class BalanceCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.paddingL),
       decoration: BoxDecoration(
-        gradient: AppColors.cardPurpleGradient,
-        borderRadius: BorderRadius.circular(34),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.26),
-            blurRadius: 35,
-            offset: const Offset(0, 22),
-          ),
-        ],
+        gradient: AppColors.primaryGradient,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppColors.cardShadow,
       ),
       child: Stack(
         children: [
@@ -46,7 +41,7 @@ class BalanceCard extends StatelessWidget {
               width: 140,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.10),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -58,7 +53,7 @@ class BalanceCard extends StatelessWidget {
               width: 130,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.04),
               ),
             ),
           ),
@@ -96,9 +91,9 @@ class BalanceCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.14),
+                  color: Colors.white.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.white.withOpacity(0.16)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                 ),
                 child: Row(
                   children: [
@@ -106,7 +101,7 @@ class BalanceCard extends StatelessWidget {
                       height: 42,
                       width: 42,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.18),
+                        color: Colors.white.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(

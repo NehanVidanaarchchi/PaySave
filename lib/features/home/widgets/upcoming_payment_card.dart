@@ -38,7 +38,7 @@ class UpcomingPaymentCard extends StatelessWidget {
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.035),
+                color: Colors.black.withValues(alpha: 0.035),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -50,7 +50,7 @@ class UpcomingPaymentCard extends StatelessWidget {
                 height: 52,
                 width: 52,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.13),
+                  color: color.withValues(alpha: 0.13),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Icon(icon, color: color, size: 26),

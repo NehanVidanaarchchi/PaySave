@@ -214,12 +214,12 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
   }) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.card,
       labelText: labelText,
       hintText: hintText,
       floatingLabelBehavior: FloatingLabelBehavior.always,
       labelStyle: const TextStyle(
-        color: AppColors.primary,
+        color: AppColors.textSecondary,
         fontSize: 13,
         fontWeight: FontWeight.w900,
       ),
@@ -230,7 +230,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
       ),
       prefixIcon: Icon(
         icon,
-        color: AppColors.primary,
+        color: AppColors.white,
         size: 22,
       ),
       contentPadding: const EdgeInsets.symmetric(
@@ -247,7 +247,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
         borderSide: const BorderSide(
-          color: AppColors.primary,
+          color: AppColors.white,
           width: 1.8,
         ),
       ),
@@ -367,7 +367,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
             key: _formKey,
             child: ListView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(22, 18, 22, 150),
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 220),
               children: [
                 _PageHeader(
                   title: _screenTitle(),
@@ -538,6 +538,13 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
                   height: 56,
                   child: ElevatedButton.icon(
                     onPressed: provider.isLoading ? null : _save,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
                     icon: provider.isLoading
                         ? const SizedBox(
                             height: 18,
@@ -583,7 +590,7 @@ class _PageHeader extends StatelessWidget {
       children: [
         if (showBack) ...[
           Material(
-            color: Colors.white,
+            color: AppColors.card,
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
@@ -643,13 +650,13 @@ class _PageHeader extends StatelessWidget {
           height: 50,
           width: 50,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.13),
+            color: AppColors.card,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: color.withValues(alpha: 0.20)),
+            border: Border.all(color: AppColors.border),
           ),
           child: Icon(
             icon,
-            color: color,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -673,15 +680,10 @@ class _HeroRecordCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingL),
       decoration: BoxDecoration(
-        gradient: AppColors.cardPurpleGradient,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
-            blurRadius: 30,
-            offset: const Offset(0, 18),
-          ),
-        ],
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppColors.cardShadow,
       ),
       child: Row(
         children: [
@@ -845,27 +847,20 @@ class _TypeButton extends StatelessWidget {
           duration: const Duration(milliseconds: 160),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: selected ? item.color : Colors.white,
+            color: selected ? Colors.white : AppColors.card,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
-              color: selected ? item.color : AppColors.border,
+              color: selected ? Colors.white : AppColors.border,
               width: 1.2,
             ),
-            boxShadow: [
-              if (selected)
-                BoxShadow(
-                  color: item.color.withValues(alpha: 0.22),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                ),
-            ],
+            boxShadow: selected ? AppColors.cardShadow : null,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 item.icon,
-                color: selected ? Colors.white : item.color,
+                color: selected ? Colors.black : Colors.white,
                 size: 25,
               ),
               const SizedBox(height: 8),
@@ -874,7 +869,7 @@ class _TypeButton extends StatelessWidget {
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: selected ? Colors.white : AppColors.textPrimary,
+                  color: selected ? Colors.black : Colors.white,
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                 ),
@@ -903,7 +898,7 @@ class _InstallmentPreview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.softLavender.withValues(alpha: 0.60),
+        color: AppColors.cardLight,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
       ),
@@ -953,17 +948,14 @@ class _CardBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingM),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: AppColors.border,
-          width: 1.2,
-        ),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
+            color: Colors.black.withValues(alpha: 0.6),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
@@ -988,9 +980,9 @@ class _MonthButton extends StatelessWidget {
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        backgroundColor: selected ? AppColors.primary : Colors.white,
-        foregroundColor: selected ? Colors.white : AppColors.primary,
-        side: const BorderSide(color: AppColors.primary, width: 1.3),
+        backgroundColor: selected ? Colors.white : AppColors.card,
+        foregroundColor: selected ? Colors.black : Colors.white,
+        side: const BorderSide(color: AppColors.border, width: 1.3),
         padding: const EdgeInsets.symmetric(vertical: 14),
       ),
       child: Text(

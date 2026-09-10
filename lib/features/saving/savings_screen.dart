@@ -136,19 +136,6 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 8,
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.addSavingGoal);
-        },
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'Add Goal',
-          style: TextStyle(fontWeight: FontWeight.w900),
-        ),
-      ),
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.softGradient),
         child: SafeArea(

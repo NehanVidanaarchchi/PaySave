@@ -69,52 +69,108 @@ class _BillsScreenState extends State<BillsScreen> {
     return records.where((item) => item.isInstallment).length;
   }
 
+  Widget _buildHeader(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Bills & Koko',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 32,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Track WiFi, GPT, electricity bills, and Koko monthly payments.',
+          style: TextStyle(
+            color: Color(0xffA1A1A1),
+            fontSize: 14,
+            height: 1.4,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 24),
+        _buildFilters(),
+      ],
+    );
+  }
+
+  Widget _buildFilters() {
+    const filters = [
+      'All',
+      'Bills',
+      'Koko',
+      'Upcoming',
+      'Unpaid',
+      'Paid',
+    ];
+
+    return SizedBox(
+      height: 44,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: filters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final selected = _selectedFilter == filters[index];
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedFilter = filters[index];
+              });
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 22,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: selected ? Colors.white : const Color(0xff151515),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: selected ? Colors.white : const Color(0xff303030),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  filters[index],
+                  style: TextStyle(
+                    color: selected ? Colors.black : Colors.white70,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.read<MoneyRecordProvider>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.black,
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.softGradient,
-        ),
+        color: Colors.black,
         child: SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 0),
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Bills & Koko',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.8,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Track WiFi, GPT, electricity bills, and Koko monthly payments.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _RecordFilterChips(
-                  selectedFilter: _selectedFilter,
-                  onChanged: (filter) {
-                    setState(() {
-                      _selectedFilter = filter;
-                    });
-                  },
-                ),
-                const SizedBox(height: 18),
+                _buildHeader(context),
+                const SizedBox(height: 20),
                 Expanded(
                   child: StreamBuilder<List<MoneyRecordModel>>(
                     stream: provider.watchRecords(),
@@ -174,59 +230,6 @@ class _BillsScreenState extends State<BillsScreen> {
   }
 }
 
-class _RecordFilterChips extends StatelessWidget {
-  final String selectedFilter;
-  final ValueChanged<String> onChanged;
-
-  const _RecordFilterChips({
-    required this.selectedFilter,
-    required this.onChanged,
-  });
-
-  static const List<String> filters = [
-    'All',
-    'Bills',
-    'Koko',
-    'Upcoming',
-    'Unpaid',
-    'Paid',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 42,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final filter = filters[index];
-          final isSelected = selectedFilter == filter;
-
-          return ChoiceChip(
-            selected: isSelected,
-            showCheckmark: false,
-            label: Text(filter),
-            selectedColor: AppColors.primary,
-            backgroundColor: AppColors.card,
-            side: BorderSide(
-              color: isSelected ? AppColors.primary : AppColors.border,
-            ),
-            labelStyle: TextStyle(
-              color: isSelected ? Colors.white : AppColors.textSecondary,
-              fontWeight: FontWeight.w900,
-              fontSize: 12,
-            ),
-            onSelected: (_) => onChanged(filter),
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _BillsSummaryCard extends StatelessWidget {
   final double totalAmount;
   final int unpaidCount;
@@ -245,15 +248,9 @@ class _BillsSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingL),
       decoration: BoxDecoration(
-        gradient: AppColors.cardPurpleGradient,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
-            blurRadius: 28,
-            offset: const Offset(0, 16),
-          ),
-        ],
+        color: const Color(0xff111111),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xff292929)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,16 +448,9 @@ class _CleanPaymentCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.paddingM),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.045),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        color: const Color(0xff111111),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xff292929)),
       ),
       child: Column(
         children: [
@@ -611,7 +601,7 @@ class _DetailPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.softLavender.withValues(alpha: 0.55),
+        color: const Color(0xff181818),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
       ),

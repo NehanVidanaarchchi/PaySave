@@ -264,7 +264,7 @@ class SettingsScreen extends StatelessWidget {
           bottom: false,
           child: ListView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(22, 18, 22, 140),
+            padding: const EdgeInsets.fromLTRB(22, 18, 22, 220),
             children: [
               const Text(
                 'Settings',
@@ -377,8 +377,9 @@ class SettingsScreen extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: () => _logout(context),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.danger,
-                  side: const BorderSide(color: AppColors.danger),
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Color(0xff333333)),
+                  backgroundColor: const Color(0xff111111),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -431,13 +432,14 @@ class _ProfileCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSizes.paddingL),
           decoration: BoxDecoration(
-            gradient: AppColors.cardPurpleGradient,
-            borderRadius: BorderRadius.circular(30),
+            color: const Color(0xff111111),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: const Color(0xff292929)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.22),
-                blurRadius: 30,
-                offset: const Offset(0, 18),
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 25,
+                offset: const Offset(0, 15),
               ),
             ],
           ),
@@ -447,7 +449,7 @@ class _ProfileCard extends StatelessWidget {
                 height: 68,
                 width: 68,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
+                  color: const Color(0xff242424),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Icon(
@@ -522,9 +524,9 @@ class _SettingsTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSizes.paddingM),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: const Color(0xff111111),
             borderRadius: BorderRadius.circular(AppSizes.radiusL),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: const Color(0xff292929)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.035),
@@ -539,12 +541,12 @@ class _SettingsTile extends StatelessWidget {
                 height: 50,
                 width: 50,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.13),
+                  color: const Color(0xff202020),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Icon(
                   icon,
-                  color: color,
+                  color: Colors.white,
                   size: 24,
                 ),
               ),
