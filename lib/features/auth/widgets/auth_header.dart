@@ -28,8 +28,9 @@ class AuthHeader extends StatelessWidget {
               ),
             ],
           ),
+          clipBehavior: Clip.antiAlias,
           child: Image.asset(
-            'assets/images/paysave_icon.png',
+            'assets/images/paysave_logo.png',
             fit: BoxFit.contain,
             errorBuilder: (_, __, ___) {
               return const Icon(
