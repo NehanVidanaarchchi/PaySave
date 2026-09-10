@@ -57,7 +57,7 @@ class SettingsScreen extends StatelessWidget {
         return AlertDialog(
           title: const Text('Clean all data?'),
           content: const Text(
-            'This will remove your records, bills, Koko payments, goals, expenses, and old monthly plans. Your account will not be deleted. This action cannot be undone.',
+            'This will remove your records, bills, instalment payments, goals, expenses, and old monthly plans. Your account will not be deleted. This action cannot be undone.',
           ),
           actions: [
             TextButton(
@@ -313,13 +313,13 @@ class SettingsScreen extends StatelessWidget {
               _SettingsTile(
                 icon: Icons.notifications_active_rounded,
                 title: 'Reminder Preferences',
-                subtitle: 'Bill and Koko payment reminders',
+                subtitle: 'Bill and instalment payment reminders',
                 color: AppColors.warning,
                 onTap: () {
                   _showInfo(
                     context,
                     'Reminder Preferences',
-                    'You can set reminder dates when adding bills and Koko payments.',
+                    'You can set reminder dates when adding bills and instalment payments.',
                   );
                 },
               ),
@@ -369,7 +369,7 @@ class SettingsScreen extends StatelessWidget {
                   _showInfo(
                     context,
                     'About PaySave',
-                    'PaySave helps users plan income, savings goals, bills, and Koko-style installment reminders.',
+                    'PaySave helps users plan income, savings goals, bills, and instalment reminders.',
                   );
                 },
               ),

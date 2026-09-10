@@ -155,7 +155,7 @@ class InstallmentModel {
       id: '',
       userId: userId,
       purchaseName: '',
-      provider: 'Koko',
+      provider: 'Instalment',
       totalAmount: 0,
       installmentCount: 3,
       installmentAmount: 0,

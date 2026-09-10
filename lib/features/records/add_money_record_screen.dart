@@ -90,7 +90,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
       case MoneyRecordModel.typeSaving:
         return 'Add Saving';
       case MoneyRecordModel.typeInstallment:
-        return 'Add Koko Payment';
+        return 'Add Instalment Payment';
       default:
         return 'Add Record';
     }
@@ -109,7 +109,7 @@ class _AddMoneyRecordScreenState extends State<AddMoneyRecordScreen> {
       case MoneyRecordModel.typeSaving:
         return 'Add money you want to save.';
       case MoneyRecordModel.typeInstallment:
-        return 'Add Koko-style 3 month or 6 month payment plans.';
+        return 'Add 3 month or 6 month instalment payment plans.';
       default:
         return 'Add your money record details.';
     }
@@ -767,7 +767,7 @@ class _TypeGrid extends StatelessWidget {
       ),
       _TypeItem(
         type: MoneyRecordModel.typeInstallment,
-        title: 'Koko',
+        title: 'Instalment',
         icon: Icons.calendar_month_rounded,
         color: AppColors.primary,
       ),

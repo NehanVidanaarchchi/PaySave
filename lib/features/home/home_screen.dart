@@ -340,7 +340,7 @@ class _DashboardViewState extends State<_DashboardView> {
                         const _SectionTitle(
                           title: 'Quick Actions',
                           subtitle:
-                              'Add salary, bills, expenses, and Koko payments',
+                              'Add salary, bills, expenses, and instalment payments',
                         ),
                         const SizedBox(height: 14),
                         const _QuickActions(),
@@ -478,7 +478,7 @@ class _MoneyRecordSummaryGrid extends StatelessWidget {
           color: AppColors.danger,
         ),
         _SummaryBox(
-          title: 'Koko / Installments',
+                          title: 'Instalment Payments',
           amount: summary.installments,
           icon: Icons.calendar_month_rounded,
           color: AppColors.primary,
@@ -603,7 +603,7 @@ class _QuickActions extends StatelessWidget {
           onTap: () => _openAdd(context, MoneyRecordModel.typeExpense),
         ),
         QuickActionCard(
-          title: 'Koko Payment',
+                          title: 'Instalment Payment',
           subtitle: '3 or 6 months',
           icon: Icons.calendar_month_rounded,
           color: AppColors.primary,

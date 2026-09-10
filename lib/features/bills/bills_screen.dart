@@ -37,7 +37,7 @@ class _BillsScreenState extends State<BillsScreen> {
       case 'Bills':
         return payments.where((record) => record.isBill).toList();
 
-      case 'Koko':
+      case 'Instalment':
         return payments.where((record) => record.isInstallment).toList();
 
       case 'Upcoming':
@@ -65,7 +65,7 @@ class _BillsScreenState extends State<BillsScreen> {
     return records.where((item) => !item.isPaid).length;
   }
 
-  int _kokoCount(List<MoneyRecordModel> records) {
+  int _instalmentCount(List<MoneyRecordModel> records) {
     return records.where((item) => item.isInstallment).length;
   }
 
@@ -74,7 +74,7 @@ class _BillsScreenState extends State<BillsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Bills & Koko',
+          'Bills & Instalment',
           style: TextStyle(
             color: Colors.white,
             fontSize: 32,
@@ -84,7 +84,7 @@ class _BillsScreenState extends State<BillsScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Track WiFi, GPT, electricity bills, and Koko monthly payments.',
+          'Track WiFi, GPT, electricity bills, and instalment payments.',
           style: TextStyle(
             color: Color(0xffA1A1A1),
             fontSize: 14,
@@ -102,7 +102,7 @@ class _BillsScreenState extends State<BillsScreen> {
     const filters = [
       'All',
       'Bills',
-      'Koko',
+      'Instalment',
       'Upcoming',
       'Unpaid',
       'Paid',
@@ -186,14 +186,14 @@ class _BillsScreenState extends State<BillsScreen> {
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const LoadingView(
-                          message: 'Loading bills and Koko payments...',
+                          message: 'Loading bills and instalment payments...',
                         );
                       }
 
                       final records = _filterRecords(snapshot.data ?? []);
                       final total = _totalAmount(records);
                       final unpaid = _unpaidCount(records);
-                      final koko = _kokoCount(records);
+                      final instalment = _instalmentCount(records);
 
                       if (records.isEmpty) {
                         return const _NoBillsView();
@@ -206,7 +206,7 @@ class _BillsScreenState extends State<BillsScreen> {
                           _BillsSummaryCard(
                             totalAmount: total,
                             unpaidCount: unpaid,
-                            kokoCount: koko,
+                            instalmentCount: instalment,
                             recordCount: records.length,
                           ),
                           const SizedBox(height: 18),
@@ -233,13 +233,13 @@ class _BillsScreenState extends State<BillsScreen> {
 class _BillsSummaryCard extends StatelessWidget {
   final double totalAmount;
   final int unpaidCount;
-  final int kokoCount;
+  final int instalmentCount;
   final int recordCount;
 
   const _BillsSummaryCard({
     required this.totalAmount,
     required this.unpaidCount,
-    required this.kokoCount,
+    required this.instalmentCount,
     required this.recordCount,
   });
 
@@ -320,8 +320,8 @@ class _BillsSummaryCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _MiniSummaryPill(
-                  title: 'Koko',
-                  value: '$kokoCount',
+                  title: 'Instalment',
+                  value: '$instalmentCount',
                   icon: Icons.calendar_month_rounded,
                 ),
               ),
@@ -405,7 +405,7 @@ class _CleanPaymentCard extends StatelessWidget {
   }
 
   String get _typeLabel {
-    if (record.isInstallment) return 'Koko Payment';
+    if (record.isInstallment) return 'Instalment Payment';
     return 'Bill';
   }
 
@@ -758,7 +758,7 @@ class _NoBillsView extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              'No bill or Koko records yet',
+              'No bill or instalment records yet',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textPrimary,
@@ -768,7 +768,7 @@ class _NoBillsView extends StatelessWidget {
             ),
             SizedBox(height: 8),
             Text(
-              'Use the Home page quick actions to add WiFi bill, GPT bill, electricity bill, or Koko 3/6 month payments.',
+              'Use the Home page quick actions to add WiFi bill, GPT bill, electricity bill, or 3/6 month instalment payments.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.textSecondary,
